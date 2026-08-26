@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MikroTik Praktik — Guru & Juri AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ===== Header ===== -->
+  <header class="app-header">
+    <div class="app-header__inner">
+      <div class="brand">
+        <div class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="28" height="28">
+            <rect x="2" y="2" width="28" height="28" rx="7" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M9 21 L16 11 L23 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="16" cy="22.5" r="1.6" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="brand__text">
+          <span class="brand__title">MikroTik Praktik</span>
+          <span class="brand__subtitle">Guru &amp; Juri AI</span>
+        </div>
+      </div>
+
+      <nav class="nav" id="nav" aria-label="Navigasi utama">
+        <button class="nav__tab is-active" data-view="buat">Buat Soal</button>
+        <button class="nav__tab" data-view="nilai">Nilai Konfigurasi</button>
+        <button class="nav__tab" data-view="tutorial">Tutorial / Latihan</button>
+        <button class="nav__tab" data-view="settings">Settings</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ============ VIEW 1: BUAT SOAL ============ -->
+    <section class="view is-active" id="view-buat" aria-label="Buat Soal">
+      <div class="view-head">
+        <h1 class="view-title">Buat Soal</h1>
+        <p class="view-desc">Minta guru AI menyusun skenario praktik MikroTik berdasarkan level, topik, dan mode yang kamu pilih.</p>
+      </div>
+
+      <div class="card form-card">
+        <form id="form-generate" class="form" autocomplete="off">
+          <div class="field">
+            <label for="gen-level">Level</label>
+            <select id="gen-level" name="level">
+              <option value="pemula">Pemula</option>
+              <option value="menengah">Menengah</option>
+              <option value="lanjut">Lanjut</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="gen-topic">Topik</label>
+            <select id="gen-topic" name="topic">
+              <option value="">Memuat daftar topik…</option>
+            </select>
+            <small class="hint">Pilih topik dari bank skenario, atau biarkan AI memilih.</small>
+          </div>
+
+          <div class="field">
+            <span class="field-label">Mode</span>
+            <div class="radio-row" role="radiogroup" aria-label="Mode">
+              <label class="radio-pill">
+                <input type="radio" name="mode" value="cli" checked />
+                <span>CLI</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="mode" value="gui" />
+                <span>GUI Winbox</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="gen-notes">Catatan opsional</label>
+            <textarea id="gen-notes" name="notes" rows="3" placeholder="Misal: fokus ke keamanan firewall, hindari VLAN, gunakan subnet /26…"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary" id="btn-generate">
+              <span class="btn__label">Generate</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div id="scenario-result" class="scenario-result" hidden></div>
+    </section>
+
+    <!-- ============ VIEW 2: NILAI KONFIGURASI ============ -->
+    <section class="view" id="view-nilai" aria-label="Nilai Konfigurasi">
+      <div class="read-only-banner" role="note">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm0 2.2 6 2.25V11c0 3.9-2.5 7.4-6 8.9-3.5-1.5-6-5-6-8.9V6.45L12 4.2Zm-1 5.3v5h2v-5h-2Zm0-3v2h2V6.5h-2Z"/></svg>
+        <span>Audit bersifat <strong>READ-ONLY</strong>. Skill tidak mengubah konfigurasi router.</span>
+      </div>
+
+      <div class="view-head">
+        <h1 class="view-title">Nilai Konfigurasi</h1>
+        <p class="view-desc">Pilih skenario, lalu audit router secara langsung lewat SSH atau tempel hasil konfigurasi.</p>
+      </div>
+
+      <div class="card form-card">
+        <div class="field">
+          <label for="assess-scenario">Skenario</label>
+          <div class="combo">
+            <select id="assess-scenario" name="scenario">
+              <option value="">— pilih skenario hasil generate —</option>
+            </select>
+            <span class="combo__sep">atau</span>
+            <input type="text" id="assess-scenario-id" placeholder="tempel ID skenario" />
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">Mode penilaian</span>
+          <div class="radio-row" role="radiogroup" aria-label="Mode penilaian">
+            <label class="radio-pill">
+              <input type="radio" name="assess-mode" value="cli" checked />
+              <span>CLI</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="assess-mode" value="gui" />
+              <span>GUI Winbox</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input tabs -->
+      <div class="tabs" id="input-tabs">
+        <button class="tabs__btn is-active" data-input="ssh">SSH Live</button>
+        <button class="tabs__btn" data-input="paste">Paste Output</button>
+      </div>
+
+      <!-- SSH Live panel -->
+      <div class="card panel is-active" id="panel-ssh">
+        <form id="form-ssh" class="form" autocomplete="off">
+          <div class="grid-2">
+            <div class="field">
+              <label for="ssh-host">Host</label>
+              <input type="text" id="ssh-host" placeholder="192.168.88.1" />
+            </div>
+            <div class="field">
+              <label for="ssh-port">Port</label>
+              <input type="number" id="ssh-port" value="22" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="ssh-user">User</label>
+            <input type="text" id="ssh-user" placeholder="admin" />
+          </div>
+
+          <div class="field">
+            <span class="field-label">Metode autentikasi</span>
+            <div class="radio-row" role="radiogroup" aria-label="Auth">
+              <label class="radio-pill">
+                <input type="radio" name="ssh-auth" value="password" checked />
+                <span>Password</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="ssh-auth" value="key" />
+                <span>Key</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field" id="field-ssh-password">
+            <label for="ssh-password">Password</label>
+            <input type="password" id="ssh-password" placeholder="••••••••" />
+          </div>
+          <div class="field" id="field-ssh-key" hidden>
+            <label for="ssh-key">Private key</label>
+            <textarea id="ssh-key" rows="4" placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="ssh-extra">Perintah tambahan (opsional, satu per baris)</label>
+            <textarea id="ssh-extra" rows="3" placeholder="/ip firewall filter print&#10;/interface print"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary" id="btn-audit">
+              <span class="btn__label">Mulai Audit</span>
+            </button>
+            <button type="button" class="btn btn--ghost" id="btn-stop" hidden>Berhenti</button>
+          </div>
+        </form>
+
+        <div class="terminal" id="terminal" hidden>
+          <div class="terminal__bar">
+            <span class="terminal__dot"></span>
+            <span class="terminal__dot"></span>
+            <span class="terminal__dot"></span>
+            <span class="terminal__title">audit log — read only</span>
+          </div>
+          <div class="terminal__body" id="terminal-body"></div>
+        </div>
+      </div>
+
+      <!-- Paste panel -->
+      <div class="card panel" id="panel-paste">
+        <form id="form-paste" class="form" autocomplete="off">
+          <div class="field">
+            <label for="paste-output">Hasil output router</label>
+            <textarea id="paste-output" rows="12" placeholder="Tempel hasil perintah seperti:&#10;/export terse&#10;/ip firewall filter print&#10;..."></textarea>
+            <small class="hint">Saran: tempel hasil <code>/export</code> atau <code>print</code> dari router agar penilaian lebih akurat.</small>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary" id="btn-paste">
+              <span class="btn__label">Nilai Sekarang</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Results -->
+      <div id="results" class="results" hidden></div>
+    </section>
+
+    <!-- ============ VIEW 4: TUTORIAL / LATIHAN ============ -->
+    <section class="view" id="view-tutorial" aria-label="Tutorial / Latihan">
+      <div class="view-head">
+        <h1 class="view-title">Tutorial / Latihan</h1>
+        <p class="view-desc">Buat jobsheet latihan berpanduan. Guru AI menyusun langkah konfigurasi MikroTik lengkap dengan latihan praktik di router.</p>
+      </div>
+
+      <div class="card form-card">
+        <form id="form-tutorial" class="form" autocomplete="off">
+          <div class="field">
+            <label for="tut-level">Level</label>
+            <select id="tut-level" name="level">
+              <option value="pemula">Pemula</option>
+              <option value="menengah">Menengah</option>
+              <option value="lanjut">Lanjut</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="tut-topic">Topik</label>
+            <input type="text" id="tut-topic" name="topic" placeholder="mis. Hotspot WiFi Cafe, VLAN, VPN..." />
+            <small class="hint">Kosongkan untuk biarkan AI memilih topik.</small>
+          </div>
+
+          <div class="field">
+            <span class="field-label">Mode</span>
+            <div class="radio-row" role="radiogroup" aria-label="Mode">
+              <label class="radio-pill">
+                <input type="radio" name="tut-mode" value="gui" />
+                <span>GUI Winbox</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="tut-mode" value="cli" />
+                <span>CLI</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="tut-mode" value="both" checked />
+                <span>Keduanya</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="tut-source">Sumber Jobsheet (opsional)</label>
+            <select id="tut-source" name="source">
+              <option value="">Bebas (ai pilih)</option>
+            </select>
+            <small class="hint">Pilih jobsheet PDF sebagai acuan, atau biarkan AI menyusun bebas.</small>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary" id="btn-tutorial">
+              <span class="btn__label">Generate</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div id="tutorial-result" class="tutorial-result" hidden></div>
+    </section>
+
+    <!-- ============ VIEW 3: SETTINGS ============ -->
+    <section class="view" id="view-settings" aria-label="Settings">
+      <div class="view-head">
+        <h1 class="view-title">Settings</h1>
+        <p class="view-desc">Konfigurasi koneksi ke model AI. Kunci API hanya disimpan di server (alat lab lokal).</p>
+      </div>
+
+      <div class="card form-card">
+        <div class="status-row" id="settings-status">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="status-text">Mengecek status…</span>
+        </div>
+
+        <form id="form-settings" class="form" autocomplete="off">
+          <div class="field">
+            <label for="set-base">Base URL</label>
+            <input type="text" id="set-base" value="https://api.openai.com/v1" />
+          </div>
+          <div class="field">
+            <label for="set-key">API Key</label>
+            <input type="password" id="set-key" placeholder="sk-…" />
+            <small class="hint" id="set-key-hint">Kosongkan jika tidak ingin mengubah kunci yang tersimpan.</small>
+          </div>
+          <div class="field">
+            <label for="set-model">Model</label>
+            <input type="text" id="set-model" value="gpt-4o-mini" />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary" id="btn-save-settings">
+              <span class="btn__label">Simpan</span>
+            </button>
+          </div>
+        </form>
+        <p class="note">Catatan: API key tidak pernah dikirim kembali oleh server. Status di atas hanya menunjukkan apakah sudah terkonfigurasi.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast container -->
+  <div class="toast-wrap" id="toast-wrap" aria-live="polite"></div>
+
+  <!-- Asisten AI chat widget (all views) -->
+  <button class="chat-bubble" id="chat-bubble" aria-label="Buka Asisten AI" title="Asisten AI">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 9 9 0 0 1-3.9-.9L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5Z"/>
+    </svg>
+  </button>
+
+  <div class="chat" id="chat" hidden>
+    <div class="chat__panel">
+      <div class="chat__header">
+        <div class="chat__title">
+          <span class="chat__name">Asisten AI</span>
+          <span class="chat__sub">Paham konteks latihan kamu</span>
+        </div>
+        <button class="chat__close" id="chat-close" aria-label="Tutup">&times;</button>
+      </div>
+      <div class="chat__messages" id="chat-messages"></div>
+      <form class="chat__input" id="chat-form">
+        <textarea id="chat-text" rows="1" placeholder="Tanya soal MikroTik…"></textarea>
+        <button type="submit" class="btn btn--primary chat__send" id="chat-send"><span class="btn__label">Kirim</span></button>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

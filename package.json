@@ -1,0 +1,16 @@
+{
+  "name": "soal-generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^4.22.2",
+    "ssh2": "^1.17.0"
+  }
+}
