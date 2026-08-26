@@ -1,38 +1,38 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-26T16:45:00.000Z",
+  "generatedAt": "2026-08-27T00:10:00.000Z",
   "title": "Design System: MikroTik Praktik — Guru & Juri AI",
   "extensions": {
     "colorMeta": {
-      "primary": { "role": "primary", "displayName": "Deep Harbor Blue", "canonical": "#0a3a5c", "tonalRamp": ["#04141f", "#072a43", "#0a3a5c", "#11567f", "#1d6f9e", "#3a8bb0", "#6fb0c4", "#a9d2de"] },
-      "primary-deep": { "role": "primary", "displayName": "Harbor Blue Deep", "canonical": "#072a43", "tonalRamp": ["#03101a", "#072a43", "#0c3a5c", "#15567f", "#2a7aa3", "#4f9bc0", "#86c1d6", "#c2e2ec"] },
-      "primary-bright": { "role": "primary", "displayName": "Harbor Blue Bright", "canonical": "#11567f", "tonalRamp": ["#06283b", "#0c3f5e", "#11567f", "#1d6f9e", "#3a8bb0", "#5fa6c4", "#8fc3d8", "#c2e0ec"] },
-      "teal": { "role": "accent", "displayName": "Lab Teal", "canonical": "#0d9488", "tonalRamp": ["#053b36", "#0a5a52", "#0d9488", "#14b8a6", "#3fcabd", "#74d8cf", "#a8e7e1", "#d4f3ef"] },
-      "teal-soft": { "role": "accent", "displayName": "Teal Glow", "canonical": "#14b8a6", "tonalRamp": ["#0a5a52", "#0f8a7e", "#14b8a6", "#3fcabd", "#6fd9cf", "#9be7e0", "#c7f2ed", "#e8faf8"] },
-      "teal-tint": { "role": "accent-tint", "displayName": "Teal Mist", "canonical": "#e2f5f2", "tonalRamp": ["#b9e7e0", "#cdeee9", "#e2f5f2", "#eaf8f6", "#f2fbfa", "#f8fdfc", "#fcfffe", "#ffffff"] },
-      "bg": { "role": "neutral", "displayName": "Cool Mist", "canonical": "#eef3f7", "tonalRamp": ["#c9d6e0", "#d6e1ea", "#eef3f7", "#f3f7fa", "#f8fafc", "#fbfcfd", "#fdfeff", "#ffffff"] },
+      "primary": { "role": "primary", "displayName": "Ruangguru Orange", "canonical": "#f26d0f", "tonalRamp": ["#5e2305", "#8a3508", "#f26d0f", "#f5822f", "#f89a55", "#fbb47e", "#fdd0a8", "#fdeee2"] },
+      "primary-deep": { "role": "primary", "displayName": "Orange Deep", "canonical": "#d85f0c", "tonalRamp": ["#4a2004", "#7a3306", "#d85f0c", "#e2772c", "#ea9050", "#f1ab78", "#f8cba6", "#fdeee2"] },
+      "primary-tint": { "role": "accent-tint", "displayName": "Orange Mist", "canonical": "#fdeee2", "tonalRamp": ["#f6c9a8", "#f9d8bf", "#fdeee2", "#fef2e9", "#fef6f0", "#fef9f5", "#fefcfb", "#ffffff"] },
+      "secondary": { "role": "secondary", "displayName": "Learning Blue", "canonical": "#007bff", "tonalRamp": ["#003a73", "#0057b0", "#007bff", "#2a92ff", "#5aaaff", "#8cc4ff", "#bddcff", "#e0eefa"] },
+      "secondary-700": { "role": "secondary", "displayName": "Interactive Blue", "canonical": "#1480d8", "tonalRamp": ["#063a63", "#0c5fa0", "#1480d8", "#3a97e2", "#69b0ea", "#97c9f1", "#c4e1f8", "#e0eefa"] },
+      "secondary-tint": { "role": "secondary-tint", "displayName": "Blue Mist", "canonical": "#e0eefa", "tonalRamp": ["#b8d4f2", "#cbe1f6", "#e0eefa", "#eaf2fc", "#f2f7fd", "#f8fbfe", "#fcfdfe", "#ffffff"] },
+      "bg": { "role": "neutral", "displayName": "Light Field", "canonical": "#f5f8fc", "tonalRamp": ["#d4dde8", "#e0e8f1", "#f5f8fc", "#f8fafd", "#fbfcfe", "#fdfeff", "#feffff", "#ffffff"] },
       "surface": { "role": "neutral", "displayName": "Pure Surface", "canonical": "#ffffff", "tonalRamp": ["#e6ebef", "#eef1f4", "#f5f7f9", "#fafbfc", "#fcfeff", "#ffffff", "#ffffff", "#ffffff"] },
-      "surface-2": { "role": "neutral", "displayName": "Surface Tint", "canonical": "#f6f9fb", "tonalRamp": ["#dde6ec", "#e7eef3", "#f6f9fb", "#f9fbfc", "#fcfdfe", "#ffffff", "#ffffff", "#ffffff"] },
-      "ink": { "role": "neutral", "displayName": "Ink Slate", "canonical": "#0c2233", "tonalRamp": ["#06121c", "#0c2233", "#16344a", "#27495f", "#3d6076", "#5c7e92", "#86a2b3", "#b6c9d4"] },
-      "ink-soft": { "role": "neutral", "displayName": "Ink Muted", "canonical": "#41566a", "tonalRamp": ["#1d2a36", "#41566a", "#5a7184", "#74899a", "#90a2b0", "#aebcc7", "#cdd6dd", "#e7ecf0"] },
-      "ink-faint": { "role": "neutral", "displayName": "Ink Faint", "canonical": "#7a8ea0", "tonalRamp": ["#3c4853", "#7a8ea0", "#92a3b1", "#a8b6c1", "#c0cbd3", "#d4dbe1", "#e6eaee", "#f3f5f7"] },
-      "line": { "role": "neutral", "displayName": "Hairline", "canonical": "#dbe5ec", "tonalRamp": ["#b7c6d2", "#c4d4df", "#dbe5ec", "#e3ebf1", "#ecf1f5", "#f3f7fa", "#f9fbfc", "#ffffff"] },
-      "line-strong": { "role": "neutral", "displayName": "Hairline Strong", "canonical": "#c4d4df", "tonalRamp": ["#9aacba", "#c4d4df", "#d2dde5", "#e0e8ee", "#edf2f6", "#f5f8fa", "#fafcfe", "#ffffff"] },
-      "sev-low": { "role": "severity", "displayName": "Pass Green", "canonical": "#2f9e6e", "tonalRamp": ["#134a33", "#1d6e4c", "#2f9e6e", "#46b585", "#6cc79f", "#93d6b8", "#bce8d4", "#e3f6ed"] },
-      "sev-med": { "role": "severity", "displayName": "Caution Amber", "canonical": "#d98a16", "tonalRamp": ["#6e460a", "#a3660f", "#d98a16", "#e6a23f", "#eeb766", "#f4cd8f", "#f9e1bb", "#fdf3e3"] },
-      "sev-high": { "role": "severity", "displayName": "Alert Red", "canonical": "#cf3b3b", "tonalRamp": ["#661e1e", "#9c2c2c", "#cf3b3b", "#db5a5a", "#e67e7e", "#f0a3a3", "#f7c9c9", "#fce8e8"] }
+      "surface-2": { "role": "neutral", "displayName": "Surface Tint", "canonical": "#eef4fb", "tonalRamp": ["#d3deec", "#e0e9f4", "#eef4fb", "#f2f6fc", "#f7fafd", "#fbfcfe", "#fdfeff", "#ffffff"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#0a2540", "tonalRamp": ["#04101d", "#0a2540", "#16344a", "#27495f", "#3d6076", "#5c7e92", "#86a2b3", "#b6c9d4"] },
+      "ink-soft": { "role": "neutral", "displayName": "Ink Muted", "canonical": "#46566b", "tonalRamp": ["#1d2a36", "#46566b", "#5a7184", "#74899a", "#90a2b0", "#aebcc7", "#cdd6dd", "#e7ecf0"] },
+      "ink-faint": { "role": "neutral", "displayName": "Ink Faint", "canonical": "#8a98a8", "tonalRamp": ["#3c4853", "#8a98a8", "#92a3b1", "#a8b6c1", "#c0cbd3", "#d4dbe1", "#e6eaee", "#f3f5f7"] },
+      "line": { "role": "neutral", "displayName": "Hairline", "canonical": "#e6eaf0", "tonalRamp": ["#b7c6d2", "#c4d4df", "#e6eaf0", "#e3ebf1", "#ecf1f5", "#f3f7fa", "#f9fbfc", "#ffffff"] },
+      "line-strong": { "role": "neutral", "displayName": "Hairline Strong", "canonical": "#d5dce5", "tonalRamp": ["#9aacba", "#d5dce5", "#d2dde5", "#e0e8ee", "#edf2f6", "#f5f8fa", "#fafcfe", "#ffffff"] },
+      "sev-low": { "role": "severity", "displayName": "Pass Green", "canonical": "#1fa971", "tonalRamp": ["#0c4a32", "#147a4f", "#1fa971", "#3fbd87", "#6cc99f", "#93d6b8", "#bce8d4", "#e3f6ed"] },
+      "sev-med": { "role": "severity", "displayName": "Caution Amber", "canonical": "#e08a0b", "tonalRamp": ["#6e460a", "#a3660f", "#e08a0b", "#e6a23f", "#eeb766", "#f4cd8f", "#f9e1bb", "#fdf3e3"] },
+      "sev-high": { "role": "severity", "displayName": "Alert Red", "canonical": "#e23b3b", "tonalRamp": ["#661e1e", "#9c2c2c", "#e23b3b", "#db5a5a", "#e67e7e", "#f0a3a3", "#f7c9c9", "#fce8e8"] }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "View titles, scenario/tutorial headings, brand. Space Grotesk 700." },
-      "title": { "displayName": "Title", "purpose": "Section headings and chat name. Space Grotesk 700, 1.4rem." },
-      "body": { "displayName": "Body", "purpose": "All instructional copy. IBM Plex Sans 400, 0.95rem, line-height 1.5." },
-      "label": { "displayName": "Label", "purpose": "Eyebrows, tags, severity badges, message roles. Space Grotesk 600 uppercase." },
+      "display": { "displayName": "Display", "purpose": "View titles, scenario/tutorial headings, brand. Inter 700." },
+      "title": { "displayName": "Title", "purpose": "Section headings and chat name. Inter 700, 1.4rem." },
+      "body": { "displayName": "Body", "purpose": "All instructional copy. Inter 400, 0.95rem, line-height 1.5." },
+      "label": { "displayName": "Label", "purpose": "Eyebrows, tags, severity badges, message roles. Inter 600 uppercase." },
       "mono": { "displayName": "Mono", "purpose": "Terminal output, CLI commands, code. JetBrains Mono." }
     },
     "shadows": [
-      { "name": "ambient-rest", "value": "0 1px 2px rgba(10,58,92,.05), 0 10px 30px -12px rgba(10,58,92,.18)", "purpose": "Cards and panels at rest." },
-      { "name": "ambient-tight", "value": "0 1px 2px rgba(10,58,92,.06), 0 4px 14px -8px rgba(10,58,92,.20)", "purpose": "Issue cards and smaller blocks." },
-      { "name": "focus-ring", "value": "0 0 0 3px rgba(13,148,136,.22)", "purpose": "Input/radio focus — teal, never blue." }
+      { "name": "ambient-rest", "value": "0 6px 22px -12px rgba(10,37,64,.18)", "purpose": "Cards and panels at rest." },
+      { "name": "ambient-tight", "value": "0 4px 14px -8px rgba(10,37,64,.16)", "purpose": "Issue cards and smaller blocks." },
+      { "name": "focus-ring", "value": "0 0 0 3px rgba(242,109,15,.22)", "purpose": "Input/radio focus — orange, never blue." }
     ],
     "motion": [
       { "name": "ease-standard", "value": "cubic-bezier(.2,.7,.2,1)", "purpose": "View and card entrance transitions." },
@@ -49,57 +49,57 @@
         "name": "Primary Button",
         "kind": "button",
         "refersTo": "button-primary",
-        "description": "The single action color — teal gradient, deep-teal text.",
+        "description": "The single action color — solid orange pill, white text.",
         "html": "<button class=\"ds-btn-primary\">Generate</button>",
-        "css": ".ds-btn-primary{font-family:\"Space Grotesk\",system-ui,sans-serif;font-weight:600;font-size:.95rem;border:1px solid transparent;border-radius:9px;padding:11px 22px;cursor:pointer;background:linear-gradient(180deg,#0d9488,#14b8a6);color:#042b27;box-shadow:0 6px 18px -8px rgba(13,148,136,.7);transition:transform .14s ease,box-shadow .16s ease,filter .16s ease;} .ds-btn-primary:hover{filter:brightness(1.04);box-shadow:0 8px 22px -8px rgba(13,148,136,.85);} .ds-btn-primary:active{transform:translateY(1px);}"
+        "css": ".ds-btn-primary{font-family:\"Inter\",system-ui,sans-serif;font-weight:600;font-size:.95rem;border:1px solid transparent;border-radius:100px;padding:12px 26px;cursor:pointer;background:#f26d0f;color:#fafbfc;box-shadow:0 6px 18px -8px rgba(242,109,15,.6);transition:transform .14s ease,box-shadow .16s ease,background .16s ease;} .ds-btn-primary:hover{background:#d85f0c;box-shadow:0 8px 22px -8px rgba(242,109,15,.75);} .ds-btn-primary:active{transform:translateY(1px);}"
       },
       {
-        "name": "Ghost Button",
+        "name": "Secondary Button",
         "kind": "button",
-        "refersTo": "button-ghost",
-        "description": "Secondary action — transparent with hairline border.",
-        "html": "<button class=\"ds-btn-ghost\">Batal</button>",
-        "css": ".ds-btn-ghost{font-family:\"Space Grotesk\",system-ui,sans-serif;font-weight:600;font-size:.95rem;border:1px solid #c4d4df;border-radius:9px;padding:11px 22px;cursor:pointer;background:transparent;color:#41566a;transition:border-color .16s ease,color .16s ease;} .ds-btn-ghost:hover{border-color:#11567f;color:#0a3a5c;}"
+        "refersTo": "button-secondary",
+        "description": "Secondary action — blue-mist fill, blue text, 35px radius.",
+        "html": "<button class=\"ds-btn-secondary\">Batal</button>",
+        "css": ".ds-btn-secondary{font-family:\"Inter\",system-ui,sans-serif;font-weight:600;font-size:.95rem;border:1px solid #1480d8;border-radius:35px;padding:11px 22px;cursor:pointer;background:#e0eefa;color:#1480d8;transition:background .16s ease,color .16s ease;} .ds-btn-secondary:hover{background:#cfe4f8;}"
       },
       {
         "name": "Card",
         "kind": "card",
         "refersTo": "card",
-        "description": "Primary content surface — white, 14px radius, soft shadow.",
+        "description": "Primary content surface — white, 12px radius, soft shadow.",
         "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">Judul</h3><p class=\"ds-card-body\">Isi kartu.</p></div>",
-        "css": ".ds-card{background:#fff;border:1px solid #dbe5ec;border-radius:14px;box-shadow:0 1px 2px rgba(10,58,92,.05),0 10px 30px -12px rgba(10,58,92,.18);padding:24px;} .ds-card-title{font-family:\"Space Grotesk\",system-ui,sans-serif;font-weight:700;font-size:1.4rem;color:#0a3a5c;margin:0 0 8px;} .ds-card-body{font-family:\"IBM Plex Sans\",system-ui,sans-serif;color:#0c2233;margin:0;}"
+        "css": ".ds-card{background:#fff;border:1px solid #e6eaf0;border-radius:12px;box-shadow:0 6px 22px -12px rgba(10,37,64,.18);padding:24px;} .ds-card-title{font-family:\"Inter\",system-ui,sans-serif;font-weight:700;font-size:1.4rem;color:#0a2540;margin:0 0 8px;} .ds-card-body{font-family:\"Inter\",system-ui,sans-serif;color:#0a2540;margin:0;}"
       },
       {
         "name": "Input / Field",
         "kind": "input",
         "refersTo": "input",
-        "description": "Text input, select, textarea — Surface Tint, teal focus ring.",
+        "description": "Text input, select, textarea — white, pill (200px), orange focus ring.",
         "html": "<input class=\"ds-input\" placeholder=\"Ketik di sini…\" />",
-        "css": ".ds-input{font-family:\"IBM Plex Sans\",system-ui,sans-serif;font-size:.95rem;color:#0c2233;background:#f6f9fb;border:1px solid #c4d4df;border-radius:9px;padding:11px 13px;width:100%;transition:border-color .16s ease,box-shadow .16s ease,background .16s ease;} .ds-input:focus{outline:none;border-color:#0d9488;background:#fff;box-shadow:0 0 0 3px rgba(13,148,136,.22);}"
+        "css": ".ds-input{font-family:\"Inter\",system-ui,sans-serif;font-size:.95rem;color:#0a2540;background:#fff;border:1px solid #d5dce5;border-radius:200px;padding:11px 18px;width:100%;transition:border-color .16s ease,box-shadow .16s ease;} .ds-input:focus{outline:none;border-color:#f26d0f;box-shadow:0 0 0 3px rgba(242,109,15,.22);}"
       },
       {
         "name": "Tag / Chip",
         "kind": "chip",
         "refersTo": "tag",
-        "description": "Metadata pill — teal-mist, deep-blue text.",
+        "description": "Metadata pill — orange-mist, orange text.",
         "html": "<span class=\"ds-tag\">Pemula</span>",
-        "css": ".ds-tag{display:inline-block;font-family:\"Space Grotesk\",system-ui,sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.3px;padding:4px 11px;border-radius:999px;background:#e2f5f2;color:#0a3a5c;border:1px solid rgba(13,148,136,.3);}"
+        "css": ".ds-tag{display:inline-block;font-family:\"Inter\",system-ui,sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.3px;padding:4px 11px;border-radius:999px;background:#fdeee2;color:#f26d0f;border:1px solid rgba(242,109,15,.3);}"
       },
       {
         "name": "Nav Tab",
         "kind": "nav",
         "refersTo": "nav-tab",
-        "description": "Header navigation pill — muted light, teal-tint when active.",
+        "description": "Header navigation pill — muted ink, orange-tint when active.",
         "html": "<nav class=\"ds-nav\"><button class=\"ds-nav-tab is-active\">Buat Soal</button><button class=\"ds-nav-tab\">Nilai</button></nav>",
-        "css": ".ds-nav{display:flex;gap:6px;} .ds-nav-tab{font-family:\"Space Grotesk\",system-ui,sans-serif;font-weight:500;font-size:.92rem;color:#cfe2ec;background:transparent;border:1px solid transparent;padding:9px 16px;border-radius:999px;cursor:pointer;transition:color .18s ease,background .18s ease,border-color .18s ease;} .ds-nav-tab:hover{color:#fff;background:rgba(255,255,255,.07);} .ds-nav-tab.is-active{color:#fff;background:rgba(13,148,136,.22);border-color:rgba(20,184,166,.55);}"
+        "css": ".ds-nav{display:flex;gap:6px;} .ds-nav-tab{font-family:\"Inter\",system-ui,sans-serif;font-weight:500;font-size:.92rem;color:#5b6b7d;background:transparent;border:1px solid transparent;padding:9px 16px;border-radius:999px;cursor:pointer;transition:color .18s ease,background .18s ease,border-color .18s ease;} .ds-nav-tab:hover{color:#0a2540;background:rgba(10,37,64,.04);} .ds-nav-tab.is-active{color:#f26d0f;background:#fdeee2;border-color:rgba(242,109,15,.4);}"
       },
       {
         "name": "Chat Bubble",
         "kind": "custom",
         "refersTo": "chat-bubble",
-        "description": "Floating AI assistant trigger — teal circle, bottom-right.",
+        "description": "Floating AI assistant trigger — orange circle, bottom-right.",
         "html": "<button class=\"ds-chat-bubble\" aria-label=\"Buka asisten AI\"><svg viewBox=\"0 0 24 24\" width=\"26\" height=\"26\" fill=\"currentColor\"><path d=\"M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4V6a2 2 0 0 1 2-2Z\"/></svg></button>",
-        "css": ".ds-chat-bubble{position:fixed;right:20px;bottom:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(180deg,#0d9488,#14b8a6);color:#042b27;border:none;cursor:pointer;box-shadow:0 10px 26px -8px rgba(13,148,136,.7);display:grid;place-items:center;transition:transform .16s ease,box-shadow .16s ease;} .ds-chat-bubble:hover{transform:translateY(-2px);box-shadow:0 14px 30px -8px rgba(13,148,136,.85);}"
+        "css": ".ds-chat-bubble{position:fixed;right:20px;bottom:20px;width:56px;height:56px;border-radius:50%;background:#f26d0f;color:#fafbfc;border:none;cursor:pointer;box-shadow:0 10px 26px -8px rgba(242,109,15,.6);display:grid;place-items:center;transition:transform .16s ease,box-shadow .16s ease;} .ds-chat-bubble:hover{transform:translateY(-2px);box-shadow:0 14px 30px -8px rgba(242,109,15,.75);}"
       },
       {
         "name": "Issue Card",
@@ -107,7 +107,7 @@
         "refersTo": "issue-card",
         "description": "Assessment finding — white card, severity left-border, L1→L3 hint buttons.",
         "html": "<div class=\"ds-issue sev-high\"><div class=\"ds-issue-top\"><span class=\"ds-issue-area\">Firewall</span><span class=\"ds-sev-badge high\">High</span></div><p class=\"ds-issue-text\">Aturan filter belum menolak akses tak izin.</p><button class=\"ds-btn-l2\">Hint L1</button></div>",
-        "css": ".ds-issue{background:#fff;border:1px solid #dbe5ec;border-left:4px solid #cf3b3b;border-radius:14px;padding:18px 20px;box-shadow:0 1px 2px rgba(10,58,92,.06),0 4px 14px -8px rgba(10,58,92,.20);} .ds-issue.sev-high{border-left-color:#cf3b3b;} .ds-issue.sev-med{border-left-color:#d98a16;} .ds-issue.sev-low{border-left-color:#2f9e6e;} .ds-issue-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;} .ds-issue-area{font-family:\"Space Grotesk\",system-ui,sans-serif;font-weight:600;font-size:1.05rem;color:#0c2233;} .ds-sev-badge{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:4px 11px;border-radius:999px;background:#fbe6e6;color:#cf3b3b;} .ds-issue-text{font-family:\"IBM Plex Sans\",system-ui,sans-serif;color:#41566a;margin:0 0 12px;} .ds-btn-l2{font-family:\"Space Grotesk\",system-ui,sans-serif;font-weight:600;font-size:.9rem;border:1px solid #bcdcea;background:#eef6fb;color:#11567f;border-radius:9px;padding:8px 16px;cursor:pointer;} .ds-btn-l2:hover{background:#e2eef6;}"
+        "css": ".ds-issue{background:#fff;border:1px solid #e6eaf0;border-left:4px solid #e23b3b;border-radius:12px;padding:18px 20px;box-shadow:0 4px 14px -8px rgba(10,37,64,.16);} .ds-issue.sev-high{border-left-color:#e23b3b;} .ds-issue.sev-med{border-left-color:#e08a0b;} .ds-issue.sev-low{border-left-color:#1fa971;} .ds-issue-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;} .ds-issue-area{font-family:\"Inter\",system-ui,sans-serif;font-weight:600;font-size:1.05rem;color:#0a2540;} .ds-sev-badge{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:4px 11px;border-radius:999px;background:#fde8e8;color:#e23b3b;} .ds-issue-text{font-family:\"Inter\",system-ui,sans-serif;color:#46566b;margin:0 0 12px;} .ds-btn-l2{font-family:\"Inter\",system-ui,sans-serif;font-weight:600;font-size:.9rem;border:1px solid #bcdcea;background:#e0eefa;color:#1480d8;border-radius:35px;padding:8px 16px;cursor:pointer;} .ds-btn-l2:hover{background:#cfe4f8;}"
       },
       {
         "name": "Terminal",
@@ -115,36 +115,36 @@
         "refersTo": "terminal",
         "description": "Read-only audit console — dark, mono, color-coded log lines.",
         "html": "<div class=\"ds-terminal\"><div class=\"ds-terminal-bar\"><span class=\"ds-dot ds-dot-r\"></span><span class=\"ds-dot ds-dot-y\"></span><span class=\"ds-dot ds-dot-g\"></span><span class=\"ds-terminal-title\">audit log — read only</span></div><pre class=\"ds-terminal-body\"><span class=\"ds-log-cmd\">/ip firewall filter print</span>\n<span class=\"ds-log-out\">Flags: X - disabled</span></pre></div>",
-        "css": ".ds-terminal{border:1px solid #0c2233;border-radius:9px;overflow:hidden;background:#0b1f2e;box-shadow:0 1px 2px rgba(10,58,92,.05),0 10px 30px -12px rgba(10,58,92,.18);} .ds-terminal-bar{display:flex;align-items:center;gap:7px;background:#0a1a27;padding:9px 13px;border-bottom:1px solid #16303f;} .ds-dot{width:11px;height:11px;border-radius:50%;} .ds-dot-r{background:#ff5f57;} .ds-dot-y{background:#febc2e;} .ds-dot-g{background:#28c840;} .ds-terminal-title{margin-left:8px;color:#6f93a8;font-family:\"JetBrains Mono\",ui-monospace,monospace;font-size:.76rem;} .ds-terminal-body{font-family:\"JetBrains Mono\",ui-monospace,monospace;font-size:.83rem;color:#cfe3ee;padding:14px 16px;margin:0;line-height:1.55;} .ds-log-cmd{color:#5ad1c4;} .ds-log-cmd::before{content:\"❯ \";color:#2f9e8f;} .ds-log-out{color:#cfe3ee;}"
+        "css": ".ds-terminal{border:1px solid #0a2540;border-radius:10px;overflow:hidden;background:#0b1f2e;box-shadow:0 6px 22px -12px rgba(10,37,64,.18);} .ds-terminal-bar{display:flex;align-items:center;gap:7px;background:#0a1a27;padding:9px 13px;border-bottom:1px solid #16303f;} .ds-dot{width:11px;height:11px;border-radius:50%;} .ds-dot-r{background:#ff5f57;} .ds-dot-y{background:#febc2e;} .ds-dot-g{background:#28c840;} .ds-terminal-title{margin-left:8px;color:#6f93a8;font-family:\"JetBrains Mono\",ui-monospace,monospace;font-size:.76rem;} .ds-terminal-body{font-family:\"JetBrains Mono\",ui-monospace,monospace;font-size:.83rem;color:#cfe3ee;padding:14px 16px;margin:0;line-height:1.55;} .ds-log-cmd{color:#5ad1c4;} .ds-log-cmd::before{content:\"❯ \";color:#2f9e8f;} .ds-log-out{color:#cfe3ee;}"
       }
     ],
     "narrative": {
-      "northStar": "The Safe Lab Bench",
-      "overview": "A calm, precise workspace where students tinker with real MikroTik routers without fear. The interface behaves like a well-kept lab bench: everything has its place, nothing shouts, and the one accent — a steady teal — marks the safe, guided path. Deep harbor-blue grounds the chrome while light cool surfaces keep the working area airy and readable. The product's promise is safety, so the visuals never feel alarming or gamified; they feel trustworthy and deliberate. The system is student-first: primary reading surfaces are quiet and content-dense, while the AI's presence is signalled with the teal accent so help is always one glance away. Motion is gentle and purposeful — short fades and lifts that confirm state without distracting from learning.",
+      "northStar": "The Friendly Belajar Bench (Ruangguru-inspired)",
+      "overview": "A welcoming, high-energy learning surface where students practice real MikroTik configs with a calm safety net. Borrows the friendly, student-first language of Indonesia's favorite belajar platform: vibrant orange as the action color, a confident blue as the learning companion, white/very-light surfaces, Inter throughout, and pill-shaped rounded components that feel approachable. The read-only promise stays visible (a clear READ-ONLY banner on every assessment), but the mood is encouraging and energetic — learning should feel inviting, not clinical. The system is student-first: big friendly CTAs, rounded card-based content, and the AI assistant signalled with the orange accent so help is always one tap away.",
       "keyCharacteristics": [
-        "Deep harbor-blue chrome on light, cool surfaces; teal as the single guiding accent.",
-        "Calm & precise: soft, low-contrast shadows; restrained, professional components.",
-        "Pill language (999px) for navigation and tags; 14px cards, 9px controls.",
-        "Severity is the only place color gets loud — and only on the left border of an issue card."
+        "Vibrant orange (#f26d0f) primary on white/light-blue surfaces; blue (#007bff) as the learning companion.",
+        "Friendly & high-energy: Inter, pill buttons (100px), rounded 12px cards, soft shadows.",
+        "Student-first copy in Bahasa Indonesia; big welcoming CTAs.",
+        "Severity is the only place color gets loud — on the left border of an issue card."
       ],
       "rules": [
-        { "name": "The One Accent Rule", "body": "Teal is the only chromatic action color and appears on ≤15% of any screen — its rarity is what makes 'safe guidance' readable at a glance. Blue is structure, not action.", "section": "colors" },
-        { "name": "The Severity-Only Loud Rule", "body": "Full-saturation red/amber/green appear only on issue cards and badges. Everywhere else stays in the blue/teal/neutral calm.", "section": "colors" },
-        { "name": "The Eyebrow Rule", "body": "Section labels are uppercase Space Grotesk in teal (0.76rem) — they orient without adding weight. Body stays in IBM Plex Sans.", "section": "typography" },
-        { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest; shadows appear only as a response to state (hover, elevation, focus). The page field itself carries no shadow.", "section": "elevation" }
+        { "name": "The Orange Action Rule", "body": "Orange (#f26d0f) is the only chromatic action color — every primary CTA, active tab, and the AI assistant. Blue is the learning companion (links, secondary), not the primary action.", "section": "colors" },
+        { "name": "The Severity-Only Loud Rule", "body": "Full-saturation red/amber/green appear only on issue cards and badges. Everywhere else stays in the orange/blue/neutral friendly field.", "section": "colors" },
+        { "name": "The One-Font Rule", "body": "Inter carries the entire UI — display, body, and labels. Differentiate by weight/size, not a second face.", "section": "typography" },
+        { "name": "The Soft-Float Rule", "body": "Surfaces are flat at rest; a gentle shadow appears as a response to state (hover, elevation, focus). The page field itself carries no shadow.", "section": "elevation" }
       ],
       "dos": [
-        "Do keep teal as the only action/accent color; use blue for structure only.",
+        "Do keep orange as the only action/accent color; use blue for links/secondary.",
         "Do reserve red/amber/green for issue cards and severity badges.",
-        "Do use Space Grotesk for titles/labels and IBM Plex Sans for body; never swap.",
-        "Do keep surfaces flat at rest; let shadows answer to hover/focus only.",
-        "Do write all UI copy in Bahasa Indonesia."
+        "Do use Inter for the entire UI; differentiate by weight/size.",
+        "Do keep surfaces soft at rest; let shadows answer to hover/focus.",
+        "Do write all UI copy in Bahasa Indonesia and use big friendly CTAs."
       ],
       "donts": [
-        "Don't introduce a second chromatic accent (no purple, orange, pink) outside the severity ramp.",
-        "Don't use heavy drop shadows or neumorphism — the bench is calm, not sculpted.",
-        "Don't make buttons or inputs sharper than 9px or cards sharper than 14px.",
-        "Don't let the chat bubble or terminal break the blue/teal/neutral discipline."
+        "Don't introduce a second chromatic accent (no purple, teal, pink) outside the severity ramp.",
+        "Don't use sharp corners on buttons/inputs — they are pills; cards stay at 12px.",
+        "Don't make the UI feel clinical or technical — keep it welcoming and high-energy.",
+        "Don't let the chat bubble or terminal break the orange/blue/neutral discipline."
       ]
     }
   }

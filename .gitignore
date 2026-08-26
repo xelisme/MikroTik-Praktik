@@ -3,3 +3,5 @@ data/
 *.log
 .claude/
 .playwright-cli/
+.impeccable/config.local.json
+.firecrawl/
