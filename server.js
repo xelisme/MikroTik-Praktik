@@ -106,7 +106,7 @@ app.post('/api/assess/ssh', async (req, res) => {
   const send = (obj) => { res.write('data: ' + JSON.stringify(obj) + '\n\n'); };
 
   let closed = false;
-  req.on('close', () => { closed = true; });
+  res.on('close', () => { closed = true; });
 
   try {
     const fullOutput = await ssh.runAudit({
