@@ -31,7 +31,7 @@ Fitur pembeda: **AI bertindak sebagai juri atas konfigurasi router nyata yang di
 - **Backend:** Node.js + Express (tanpa build step)
 - **Frontend:** HTML/CSS/JS vanilla
 - **AI:** OpenAI-compatible (`/v1/chat/completions`); dikonfigurasi via env atau GUI
-- **Deploy:** Vercel serverless (`api/[[...slug]].js`)
+  - **Deploy:** Render (`render.yaml`)
 
 ## Cara Menjalankan Lokal
 
@@ -55,31 +55,24 @@ LLM_API_KEY=sk-...
 LLM_MODEL=gpt-4o-mini
 ```
 
+Template lengkap beserta `COOKIE_SECRET` ada di [`.env-example`](.env-example).
+
 **2. GUI Settings** (per-session):
-Buka menu Settings di aplikasi, isi Base URL / API Key / Model. Kunci disimpan dalam **cookie httpOnly bertanda tangan** yang **kedaluwarsa otomatis setelah 30 menit** — tidak persisten di disk, cocok untuk deploy stateless seperti Vercel.
+Buka menu Settings di aplikasi, isi Base URL / API Key / Model. Kunci disimpan dalam **cookie httpOnly bertanda tangan** yang **kedaluwarsa otomatis setelah 30 menit** — tidak persisten di disk, cocok untuk deploy stateless.
 
-> Pada Vercel (filesystem read-only), hanya jalur cookie yang berfungsi untuk menyimpan kunci per-session. Setel `COOKIE_SECRET` di environment Vercel agar cookie tidak mudah dipalsukan.
-
-## Deploy ke Vercel
-
-1. Fork/clone repo ini: <https://github.com/xelisme/MikroTik-Praktik>
-2. Import ke Vercel (framework: *Other*).
-3. (Opsional) Set `COOKIE_SECRET` di Environment Variables.
-4. Deploy — tidak perlu set API key; pengguna mengisinya lewat GUI Settings (berlaku 30 menit).
-
-`api/[[...slug]].js` mengekspor apl Express sebagai fungsi serverless Vercel.
+> Pada deploy stateless (filesystem read-only), hanya jalur cookie yang berfungsi untuk menyimpan kunci per-session. Setel `COOKIE_SECRET` di environment (mis. Render) agar cookie tidak mudah dipalsukan. Template ada di [`.env-example`](.env-example).
 
 ## Keamanan
 
 - **SSH baca-saja:** penilaian tidak boleh mengubah router — hanya perintah baca; perintah destruktif ditolak.
-- **Kunci GUI tidak persisten:** pada Vercel (fs read-only) kunci hanya ada di cookie session, otomatis hangus 30 menit.
+- **Kunci GUI tidak persisten:** pada deploy stateless (fs read-only, mis. Render) kunci hanya ada di cookie session, otomatis hangus 30 menit.
 - **Bahasa Indonesia:** UI & copy tetap dalam Bahasa Indonesia.
 
 ## Struktur Proyek
 
 ```
 server.js              # Express app + route wiring + cookie settings
-api/[[...slug]].js     # Vercel serverless entry
+render.yaml            # Render deploy config
 src/
   llm.js               # OpenAI-compatible call wrapper
   scenarios.js         # Buat Soal
@@ -98,7 +91,14 @@ demo/                  # website-walkthrough.mp4
 
 ## Demo
 
-Lihat walkthrough singkat di [`demo/website-walkthrough.mp4`](demo/website-walkthrough.mp4) yang menunjukkan keempat fitur (Settings, Buat Soal, Nilai Konfigurasi, Tutorial/Latihan).
+Walkthrough singkat yang menunjukkan keempat fitur (Settings, Buat Soal, Nilai Konfigurasi, Tutorial/Latihan):
+
+<video src="demo/website-walkthrough.mp4" controls width="100%" poster="">
+  Browser Anda tidak mendukung pemutar video; unduh langsung:
+  <a href="demo/website-walkthrough.mp4">demo/website-walkthrough.mp4</a>
+</video>
+
+Atau unduh langsung: [`demo/website-walkthrough.mp4`](demo/website-walkthrough.mp4)
 
 ## Repositori
 
