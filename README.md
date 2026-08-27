@@ -1,4 +1,4 @@
-![Demo Walkthrough](https://github.com/user-attachments/assets/97c946a8-39b4-4318-b9f9-39b9eeeeb6ab)
+https://github.com/user-attachments/assets/97c946a8-39b4-4318-b9f9-39b9eeeeb6ab
 
 # MikroTik Praktik - Guru & Juri AI
 
