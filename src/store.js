@@ -16,7 +16,30 @@ function writeJson(p, v) {
 
 const EXPIRY_MS = 30 * 60 * 1000; // LLM credentials auto-clear after 30 min for safety
 
+// Environment-provided credentials (e.g. Render dashboard) take precedence over the
+// on-disk settings and are managed by the platform — NOT subject to the 30-min wipe.
+// Use LLM_-prefixed vars ONLY, so we never accidentally pick up an unrelated generic
+// API_KEY / BASE_URL that another tool might set in the environment.
+function envSettings() {
+  const base = process.env.LLM_BASE_URL;
+  const key = process.env.LLM_API_KEY;
+  const model = process.env.LLM_MODEL;
+  if (!key) return null;
+  return {
+    baseURL: base || '',
+    apiKey: key,
+    model: model || 'gpt-4o-mini',
+    configured: !!(base && key),
+    expired: false,
+    expiresAt: null,
+    source: 'env',
+  };
+}
+
 function getSettings() {
+  const env = envSettings();
+  if (env) return env;
+
   const s = readJson(SETTINGS, {});
   if (s.expiresAt && Date.now() > s.expiresAt) {
     // credentials expired -> clear the secret from disk for safety
@@ -30,6 +53,7 @@ function getSettings() {
       configured: false,
       expired: true,
       expiresAt: null,
+      source: 'settings',
     };
   }
   return {
@@ -39,6 +63,7 @@ function getSettings() {
     configured: !!(s.baseURL && s.apiKey),
     expired: false,
     expiresAt: s.expiresAt || null,
+    source: 'settings',
   };
 }
 

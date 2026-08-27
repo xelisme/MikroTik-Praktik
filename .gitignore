@@ -5,3 +5,5 @@ data/
 .playwright-cli/
 .impeccable/config.local.json
 .firecrawl/
+.env
+.env.*

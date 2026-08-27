@@ -707,15 +707,30 @@
 
       $("#set-base").value = d.baseURL || "https://api.openai.com/v1";
       $("#set-model").value = d.model || "gpt-4o-mini";
-      // apiKey NEVER returned — leave blank, hint that it's stored
-      if (d.configured) {
+
+      const formEls = ["#set-base", "#set-key", "#set-model", "#btn-save-settings"];
+      const setFormDisabled = (v) => formEls.forEach(sel => { const el = $(sel); if (el) el.disabled = v; });
+
+      if (d.source === "env") {
+        // credentials come from the platform environment (e.g. Render) — panel is ignored
+        setFormDisabled(true);
         dot.className = "status-dot ok";
-        text.textContent = "Sudah terkonfigurasi (kunci tersimpan di server).";
-        $("#set-key-hint").textContent = "Kosongkan jika tidak ingin mengubah kunci yang tersimpan.";
+        text.textContent = d.configured
+          ? "Dikonfigurasi melalui environment (Render)."
+          : "Environment: lengkapi LLM_BASE_URL & LLM_API_KEY di dashboard Render.";
+        $("#set-key-hint").textContent = "Kunci diambil dari environment — panel ini tidak digunakan.";
       } else {
-        dot.className = "status-dot no";
-        text.textContent = "Belum terkonfigurasi.";
-        $("#set-key-hint").textContent = "Masukkan API key untuk mengaktifkan fitur AI.";
+        setFormDisabled(false);
+        // apiKey NEVER returned — leave blank, hint that it's stored
+        if (d.configured) {
+          dot.className = "status-dot ok";
+          text.textContent = "Sudah terkonfigurasi (kunci tersimpan di server, kedaluwarsa 30 mnt).";
+          $("#set-key-hint").textContent = "Kosongkan jika tidak ingin mengubah kunci yang tersimpan.";
+        } else {
+          dot.className = "status-dot no";
+          text.textContent = "Belum terkonfigurasi.";
+          $("#set-key-hint").textContent = "Masukkan API key untuk mengaktifkan fitur AI.";
+        }
       }
     } catch (e) {
       dot.className = "status-dot no";

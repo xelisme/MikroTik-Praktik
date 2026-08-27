@@ -18,7 +18,7 @@ app.use(express.static(PUBLIC));
 // ---- Settings ----
 app.get('/api/settings', (req, res) => {
   const s = store.getSettings();
-  res.json({ configured: s.configured, baseURL: s.baseURL, model: s.model, expiresAt: s.expiresAt });
+  res.json({ configured: s.configured, baseURL: s.baseURL, model: s.model, expiresAt: s.expiresAt, source: s.source });
 });
 app.post('/api/settings', (req, res) => {
   const { baseURL, apiKey, model } = req.body || {};
