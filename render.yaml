@@ -1,0 +1,31 @@
+# Render deployment config for MikroTik Praktik — Guru & Juri AI
+#
+# Node version is taken from package.json "engines.node" (>=18) — no separate
+# pin needed here.
+#
+# The LLM_* environment variables below are OPTIONAL:
+#   - If left unset, users configure the AI provider at runtime via the in-app
+#     Settings panel (Base URL / API Key / Model). Those values are stored in a
+#     signed, httpOnly cookie that expires after 30 minutes (per-session) — no
+#     server restart required.
+#   - Set them here only if you want a persistent, platform-managed key.
+#
+# This file is independent of the Vercel deployment (api/[[...slug]].js); you can
+# keep both and deploy to either platform.
+
+services:
+  - type: web
+    name: mikrotik-praktik
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: LLM_BASE_URL
+        sync: false
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        sync: false
+      - key: COOKIE_SECRET
+        sync: false
