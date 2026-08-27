@@ -36,8 +36,9 @@ app.use((req, res, next) => {
 });
 
 const PUBLIC = path.join(__dirname, 'public');
-// Vercel serves ./public statically; only mount express.static when running locally.
-if (!process.env.VERCEL) app.use(express.static(PUBLIC));
+// Serve ./public from within the function — works both locally and on Vercel.
+// (Vercel does NOT auto-serve ./public for this serverless deploy type.)
+app.use(express.static(PUBLIC));
 
 // ---- Settings ----
 app.get('/api/settings', (req, res) => {

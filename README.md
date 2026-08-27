@@ -31,7 +31,7 @@ Fitur pembeda: **AI bertindak sebagai juri atas konfigurasi router nyata yang di
 - **Backend:** Node.js + Express (tanpa build step)
 - **Frontend:** HTML/CSS/JS vanilla
 - **AI:** OpenAI-compatible (`/v1/chat/completions`); dikonfigurasi via env atau GUI
-  - **Deploy:** Render (`render.yaml`)
+  - **Deploy:** Render (`render.yaml`) atau Vercel (`api/[[...slug]].js`)
 
 ## Cara Menjalankan Lokal
 
@@ -67,6 +67,26 @@ Buka menu Settings di aplikasi, isi Base URL / API Key / Model. Kunci disimpan d
 - **SSH baca-saja:** penilaian tidak boleh mengubah router — hanya perintah baca; perintah destruktif ditolak.
 - **Kunci GUI tidak persisten:** pada deploy stateless (fs read-only, mis. Render) kunci hanya ada di cookie session, otomatis hangus 30 menit.
 - **Bahasa Indonesia:** UI & copy tetap dalam Bahasa Indonesia.
+
+## Deploy ke Vercel (Preview)
+
+Cocok untuk preview agar orang bisa mencoba aplikasi. Aplikasi berjalan sebagai
+serverless function via `api/[[...slug]].js`; frontend disajikan dari dalam function
+(Vercel tidak otomatis menyajikan `./public`).
+
+1. **Import** repo `xelisme/MikroTik-Praktik` (branch `main`) ke Vercel.
+2. **Framework Preset:** `Other` · **Root Directory:** `./` · **Install:** `npm install` · **Build:** kosongkan.
+3. **Environment Variables:**
+   | Key | Value |
+   |-----|-------|
+   | `COOKIE_SECRET` | string acak (mis. `openssl rand -hex 32`) |
+   | `LLM_BASE_URL` | endpoint publik, mis. `https://api.openai.com/v1` |
+   | `LLM_API_KEY` | key LLM publik kamu |
+   | `LLM_MODEL` | `gpt-4o-mini` |
+4. **Deploy.** Vercel memberi URL `*.vercel.app`.
+5. **Domain (opsional):** Vercel → Settings → Domains → tambahkan mis. `mikrotik-praktik.reyvien.me`, lalu di DNS host buat **CNAME** `mikrotik-praktik` → `cname.vercel-dns.com`.
+
+> Catatan: key demo (gateway lokal `localhost:20128`) **tidak** berfungsi di Vercel — gunakan endpoint & key LLM publik. Audit SSH langsung bisa kena timeout ~10 detik di Vercel hobby; gunakan mode "tempel output" di preview.
 
 ## Struktur Proyek
 
