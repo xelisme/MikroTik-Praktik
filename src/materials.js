@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const SKILL_DIR = process.env.SKILL_DIR || '/home/nyaw/.config/opencode/skills/mikrotik-praktik-juri';
+const SKILL_DIR = process.env.SKILL_DIR || path.join(__dirname, '..', 'references');
 const REF = path.join(SKILL_DIR, 'references');
 const EXTRACTED = path.join(REF, 'extracted');
 

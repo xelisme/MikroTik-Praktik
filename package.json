@@ -13,6 +13,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "cookie-parser": "^1.4.7",
     "express": "^4.22.2",
     "ssh2": "^1.17.0"
   }

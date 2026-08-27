@@ -69,7 +69,7 @@ Output HARUS JSON object persis:
 Balas HANYA JSON, tanpa teks lain dan tanpa markdown fence.`;
 }
 
-async function generate(body) {
+async function generate(body, opts) {
   const level = body.level || 'pemula';
   const topic = body.topic || '';
   const mode = ['gui', 'cli', 'both'].includes(body.mode) ? body.mode : 'both';
@@ -82,7 +82,7 @@ async function generate(body) {
   const parsed = await llm.complete([
     { role: 'system', content: 'Kamu menyusun tutorial praktik MikroTik dalam bahasa Indonesia. Balas hanya JSON.' },
     { role: 'user', content: buildTutorialPrompt({ level, topic, mode, sourceText }) }
-  ], { json: true });
+  ], { json: true, settings: opts && opts.settings });
 
   const id = 'tut_' + crypto.randomBytes(5).toString('hex');
   const full = {

@@ -72,7 +72,7 @@ Output HARUS JSON object persis:
 Balas HANYA JSON, tanpa teks lain dan tanpa markdown fence.`;
 }
 
-async function analyze({ scenarioId, mode, output }) {
+async function analyze({ scenarioId, mode, output, settings }) {
   if (!output || !output.trim()) throw new Error('Output router kosong. Paste hasil command atau jalankan audit SSH dulu.');
   const scenario = scenarioId ? store.getScenario(scenarioId) : null;
   const useMode = mode || (scenario && scenario.mode) || 'cli';
@@ -80,7 +80,7 @@ async function analyze({ scenarioId, mode, output }) {
   const parsed = await llm.complete([
     { role: 'system', content: 'Kamu menilai konfigurasi MikroTik secara read-only dalam bahasa Indonesia. Balas hanya JSON.' },
     { role: 'user', content: buildAnalyzePrompt({ scenario, mode: useMode, output }) }
-  ], { json: true });
+  ], { json: true, settings });
   const issues = Array.isArray(parsed.issues) ? parsed.issues.map((it, i) => ({
     id: i + 1,
     area: it.area || 'Umum',

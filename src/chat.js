@@ -54,12 +54,12 @@ Jawab pertanyaan pengguna dengan memanfaatkan konteks di atas.`;
 }
 
 // messages: [{role:'user'|'assistant', content}], context: {view, scenario, tutorial}
-async function reply(messages, context) {
+async function reply(messages, context, opts) {
   const sys = buildSystemPrompt(context);
   const full = [{ role: 'system', content: sys }].concat(
     (messages || []).map((x) => ({ role: x.role, content: x.content }))
   );
-  return await llm.chat(full, { temperature: 0.4 });
+  return await llm.chat(full, { temperature: 0.4, settings: opts && opts.settings });
 }
 
 module.exports = { reply, buildSystemPrompt };

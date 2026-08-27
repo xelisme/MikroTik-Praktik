@@ -6,12 +6,19 @@ const DATA = path.join(__dirname, '..', 'data');
 const SETTINGS = path.join(DATA, 'settings.json');
 const SCEN = path.join(DATA, 'scenarios.json');
 
-function ensure() { if (!fs.existsSync(DATA)) fs.mkdirSync(DATA, { recursive: true }); }
+function ensure() { try { if (!fs.existsSync(DATA)) fs.mkdirSync(DATA, { recursive: true }); } catch {} }
 function readJson(p, def) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return def; } }
 function writeJson(p, v) {
-  ensure();
-  fs.writeFileSync(p, JSON.stringify(v, null, 2));
-  try { fs.chmodSync(p, 0o600); } catch {}
+  try {
+    ensure();
+    fs.writeFileSync(p, JSON.stringify(v, null, 2));
+    try { fs.chmodSync(p, 0o600); } catch {}
+    return true;
+  } catch (e) {
+    // Read-only filesystem (e.g. Vercel serverless) — writes can't persist.
+    console.warn('[store] write skipped (read-only fs?):', p);
+    return false;
+  }
 }
 
 const EXPIRY_MS = 30 * 60 * 1000; // LLM credentials auto-clear after 30 min for safety
@@ -61,7 +68,7 @@ function getSettings() {
   }
   const env = envSettings();
   if (env) return env;
-  // no GUI credentials and no env -> return whatever is on disk (likely empty)
+  // no GUI credentials and no env -> not configured
   return {
     baseURL: s.baseURL || '',
     apiKey: s.apiKey || '',
@@ -69,7 +76,7 @@ function getSettings() {
     configured: !!(s.baseURL && s.apiKey),
     expired: false,
     expiresAt: s.expiresAt || null,
-    source: 'settings',
+    source: 'none',
   };
 }
 

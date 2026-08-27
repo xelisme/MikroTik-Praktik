@@ -99,14 +99,14 @@ Output HARUS JSON object persis dengan field:
 Mode = "${mode}". Balas HANYA JSON, tanpa teks lain dan tanpa markdown fence.`;
 }
 
-async function generate(body) {
+async function generate(body, opts) {
   const level = body.level || 'pemula';
   const topic = body.topic || 'bebas';
   const mode = body.mode === 'gui' ? 'gui' : 'cli';
   const parsed = await llm.complete([
     { role: 'system', content: 'Kamu membuat soal praktik MikroTik dalam bahasa Indonesia. Balas hanya JSON.' },
     { role: 'user', content: buildGeneratePrompt({ level, topic, mode, notes: body.notes }) }
-  ], { json: true });
+  ], { json: true, settings: opts && opts.settings });
   const id = 'sc_' + crypto.randomBytes(5).toString('hex');
   const full = {
     id,

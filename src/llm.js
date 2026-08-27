@@ -33,7 +33,7 @@ function extractJSON(text) {
 }
 
 async function chat(messages, opts = {}) {
-  const s = store.getSettings();
+  const s = (opts && opts.settings) || store.getSettings();
   if (!s.baseURL || !s.apiKey) {
     throw new Error('AI belum dikonfigurasi. Buka menu Settings untuk isi Base URL & API Key.');
   }
