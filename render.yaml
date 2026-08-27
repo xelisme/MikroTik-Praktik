@@ -9,3 +9,4 @@ services:
     # Render auto-injects PORT; server.js reads process.env.PORT.
     # data/ is gitignored + ephemeral on free tier: enter LLM settings via the
     # in-app Settings tab after deploy (they reset on restart).
+    # LLM_* env vars are OPTIONAL — the in-app Settings tab can override them.

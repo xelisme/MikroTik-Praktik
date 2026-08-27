@@ -9,6 +9,9 @@
   },
   "keywords": [],
   "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "express": "^4.22.2",
     "ssh2": "^1.17.0"

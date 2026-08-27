@@ -37,25 +37,31 @@ function envSettings() {
 }
 
 function getSettings() {
+  const s = readJson(SETTINGS, {});
+  // GUI-saved credentials take precedence over environment variables, so the
+  // in-app Settings panel is always usable (env becomes a fallback). This keeps
+  // deployment flexible: set LLM_* env for persistence, or use the panel to override.
+  if (s.baseURL && s.apiKey) {
+    if (s.expiresAt && Date.now() > s.expiresAt) {
+      // credentials expired -> clear the secret from disk, fall through to env
+      delete s.apiKey;
+      delete s.expiresAt;
+      writeJson(SETTINGS, s);
+    } else {
+      return {
+        baseURL: s.baseURL,
+        apiKey: s.apiKey,
+        model: s.model || 'gpt-4o-mini',
+        configured: true,
+        expired: false,
+        expiresAt: s.expiresAt || null,
+        source: 'settings',
+      };
+    }
+  }
   const env = envSettings();
   if (env) return env;
-
-  const s = readJson(SETTINGS, {});
-  if (s.expiresAt && Date.now() > s.expiresAt) {
-    // credentials expired -> clear the secret from disk for safety
-    delete s.apiKey;
-    delete s.expiresAt;
-    writeJson(SETTINGS, s);
-    return {
-      baseURL: s.baseURL || '',
-      apiKey: '',
-      model: s.model || 'gpt-4o-mini',
-      configured: false,
-      expired: true,
-      expiresAt: null,
-      source: 'settings',
-    };
-  }
+  // no GUI credentials and no env -> return whatever is on disk (likely empty)
   return {
     baseURL: s.baseURL || '',
     apiKey: s.apiKey || '',

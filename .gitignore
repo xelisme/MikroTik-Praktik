@@ -7,3 +7,4 @@ data/
 .firecrawl/
 .env
 .env.*
+strix_runs/

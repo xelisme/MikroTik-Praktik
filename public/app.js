@@ -723,13 +723,15 @@
       const setFormDisabled = (v) => formEls.forEach(sel => { const el = $(sel); if (el) el.disabled = v; });
 
       if (d.source === "env") {
-        // credentials come from the platform environment (e.g. Render) — panel is ignored
-        setFormDisabled(true);
+        // env is a fallback; the panel below can override it
+        setFormDisabled(false);
         dot.className = "status-dot ok";
         text.textContent = d.configured
-          ? "Dikonfigurasi melalui environment (Render)."
-          : "Environment: lengkapi LLM_BASE_URL & LLM_API_KEY di dashboard Render.";
-        $("#set-key-hint").textContent = "Kunci diambil dari environment — panel ini tidak digunakan.";
+          ? "Dikonfigurasi via environment — bisa di-override lewat panel ini."
+          : "Environment belum lengkap — isi panel di bawah untuk mengaktifkan.";
+        $("#set-key-hint").textContent = d.configured
+          ? "Kosongkan key untuk memakai key dari environment."
+          : "Masukkan API key untuk mengaktifkan fitur AI.";
       } else {
         setFormDisabled(false);
         // apiKey NEVER returned — leave blank, hint that it's stored

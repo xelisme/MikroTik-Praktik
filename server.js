@@ -26,7 +26,10 @@ app.post('/api/settings', (req, res) => {
   const cur = store.getSettings();
   if (!cur.configured && !apiKey) return res.status(400).json({ error: 'apiKey wajib diisi pertama kali.' });
   const toSave = { baseURL, model };
-  if (apiKey !== undefined && apiKey !== '') toSave.apiKey = apiKey;
+  // use the provided key, otherwise adopt the currently-effective key (env or saved)
+  // so a GUI save can override env without re-typing the secret.
+  const effectiveKey = (apiKey && apiKey !== '') ? apiKey : (cur.apiKey || undefined);
+  if (effectiveKey) toSave.apiKey = effectiveKey;
   store.saveSettings(toSave);
   res.json({ ok: true, expiresAt: store.getSettings().expiresAt });
 });
