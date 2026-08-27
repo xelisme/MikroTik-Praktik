@@ -10,9 +10,21 @@ function buildAnalyzePrompt({ scenario, mode, output }) {
     ? scenario.hiddenCriteria.map((c, i) => `${i + 1}. ${c.point} — cek: ${c.check}`).join('\n')
     : '(tidak ada skenario spesifik; nilai berdasarkan output umum & best practice RouterOS)';
 
-  const guiNote = mode === 'gui'
+  const isGui = mode === 'gui';
+  const modeLabel = isGui ? 'GUI (WinBox)' : 'CLI (Terminal)';
+  const guiNote = isGui
     ? `\nMATERI GUI (pakai bahasa menu Winbox untuk hint, mis. "IP > Hotspot > Users"):\n${m.gui}\n`
     : '';
+
+  const formatRule = isGui
+    ? `FORMAT MODE GUI (WAJIB DIKUTI):
+- level2: arahkan lewat NAVIGASI MENU WINBOX (contoh: "IP > Addresses > klik + > Address: 192.168.100.1/24, Interface: wlan1 > OK"), BUKAN perintah CLI.
+- level3: jelaskan langkah navigasi WinBox lengkap untuk memperbaiki.
+- fixCommands: tulis langkah menu WinBox (bukan perintah CLI), pisahkan beberapa langkah dengan baris baru.`
+    : `FORMAT MODE CLI (WAJIB DIKUTI):
+- level2: arahkan lewat PERINTAH CLI spesifik (contoh: "/ip address add address=192.168.100.1/24 interface=wlan1").
+- level3: berikan perintah CLI perbaikan lengkap.
+- fixCommands: tulis perintah CLI (bisa multi-baris, pisahkan dengan \\n).`;
 
   return `Kamu adalah juri praktik MikroTik RouterOS. Kamu menilai konfigurasi murid secara READ-ONLY dan membimbing dengan hint bertahap. Kamu TIDAK PERNAH mengubah konfigurasi router.
 
@@ -35,7 +47,8 @@ OUTPUT ROUTER (hasil command read-only yang sudah dijalankan):
 ${output}
 ===== END OUTPUT =====
 
-MODE: ${mode === 'gui' ? 'gui (pakai bahasa menu Winbox untuk hint)' : 'cli (pakai command CLI untuk hint)'}
+MODE PENILAIAN: ${modeLabel}
+${formatRule}
 
 TUGAS:
 - Bandingkan output router dengan kriteria sukses & best practice. Temukan kesalahan / ketidaksesuaian.
@@ -43,9 +56,9 @@ TUGAS:
   area: nama area (mis. "NAT", "Hotspot User Profile", "Wireless", "Routing")
   severity: "low" | "medium" | "high"
   level1: arahkan area SAJA, bukan detail (1-2 kalimat, gaya "coba cek bagian X")
-  level2: persempit ke command/parameter spesifik TANPA memberi nilai jawaban
-  level3: jawaban penuh — apa yang salah, kenapa salah, dan command perbaikannya
-  fixCommands: string command perbaikan SEBAGAI SARAN TEKS (tidak dijalankan)
+  level2: persempit ke langkah spesifik TANPA memberi nilai jawaban — ikuti FORMAT MODE di atas
+  level3: jawaban penuh — apa yang salah, kenapa salah, dan cara memperbaiki — ikuti FORMAT MODE di atas
+  fixCommands: string perbaikan SEBAGAI SARAN TEKS (tidak dijalankan) — ikuti FORMAT MODE di atas
   concept: penjelasan prinsip singkat di baliknya
 - summary: ringkasan status konfigurasi (apa yang sudah benar, apa yang belum).
 - Kalau tidak ada masalah: issues = [] dan summary menyatakan konfigurasi sudah sesuai kriteria.

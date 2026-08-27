@@ -19,6 +19,7 @@
     currentView: "buat",
     sshAbort: null,       // AbortController for streaming
     activeScenarioId: null,
+    modeTouched: false,   // user has explicitly chosen an assess mode
   };
 
   /* ---------------- Tiny helpers ---------------- */
@@ -276,11 +277,16 @@
     state.activeScenarioId = id;
     const sc = state.scenarios.find((s) => s.id === id);
     state.currentScenario = sc || null;
-    if (sc && sc.mode) {
+    if (sc && sc.mode && !state.modeTouched) {
       const r = $(`input[name="assess-mode"][value="${sc.mode}"]`);
       if (r) r.checked = true;
     }
   }
+
+  // remember explicit mode choice so scenario selection doesn't clobber it
+  document.querySelectorAll('input[name="assess-mode"]').forEach((r) => {
+    r.addEventListener("change", () => { state.modeTouched = true; });
+  });
 
   /* ---------- SSH Live streaming ---------- */
   $("#form-ssh").addEventListener("submit", async (e) => {
