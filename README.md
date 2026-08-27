@@ -52,20 +52,6 @@ Dua cara (GUI menimpa env):
 
 ---
 
-## Deploy ke Vercel (Preview)
-
-1. Import repo `xelisme/MikroTik-Praktik` (branch `main`) ke Vercel.
-2. Framework Preset: `Other` - Root `./` - Install `npm install` - Build kosongkan.
-3. Environment Variables: `COOKIE_SECRET` (acak), `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` (publik, bukan gateway lokal).
-4. Deploy - URL `*.vercel.app`.
-5. Domain (opsional): Vercel - Settings - Domains - `mikrotik-praktik.reyvien.me`; DNS CNAME `mikrotik-praktik` - `cname.vercel-dns.com`.
-
-> Audit SSH langsung bisa kena timeout ~10 detik di Vercel hobby. Gunakan mode "tempel output" di preview.
-
-Render juga didukung lewat `render.yaml`.
-
----
-
 ## Struktur Proyek
 
 | File | Isi |
