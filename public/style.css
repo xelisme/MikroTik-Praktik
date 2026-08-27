@@ -275,6 +275,8 @@ select:focus, input:focus, textarea:focus {
   font-size: 1.4rem; margin: 0 0 8px; color: var(--ink);
 }
 .tag-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.scenario-id-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: var(--ink-faint); }
+.scenario-id { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .tag {
   font-size: .76rem; font-weight: 700; letter-spacing: .3px;
   padding: 5px 12px; border-radius: 999px;

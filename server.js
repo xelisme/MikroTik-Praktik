@@ -53,6 +53,11 @@ app.get('/api/scenarios/:id', (req, res) => {
   res.json(scenarios.publicView(full));
 });
 
+// ---- List scenarios (metadata only, no hidden criteria) ----
+app.get('/api/scenarios', (req, res) => {
+  res.json(store.listScenarioMeta());
+});
+
 // ---- Tutorial / Latihan sources (jobsheet PDFs) ----
 app.get('/api/tutorial-sources', (req, res) => res.json(tutorial.listSources()));
 

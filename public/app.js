@@ -80,6 +80,7 @@
     state.currentView = name;
     $$(".nav__tab").forEach((t) => t.classList.toggle("is-active", t.dataset.view === name));
     $$(".view").forEach((v) => v.classList.toggle("is-active", v.id === `view-${name}`));
+    if (name === "nilai") refreshScenarioOptions();
   }
 
   $$(".nav__tab").forEach((tab) => {
@@ -196,6 +197,10 @@
             el("span", { class: "tag" }, cap(d.level)),
             el("span", { class: "tag" }, d.topic || "Bebas"),
             el("span", { class: "tag tag--mode" }, d.mode === "gui" ? "GUI Winbox" : "CLI")
+          ),
+          el("div", { class: "scenario-id-row" },
+            el("span", { class: "scenario-id" }, "ID: " + d.id),
+            el("button", { class: "copy-btn", type: "button", onclick: (ev) => copyText(d.id, ev.currentTarget) }, "Salin ID")
           )
         )
       ),
@@ -896,8 +901,21 @@
      Boot
      ========================================================= */
   async function init() {
-    refreshScenarioOptions();
+    await loadScenarioList();
     await Promise.allSettled([loadTemplates(), loadSettings(), loadTutorialSources()]);
+  }
+
+  async function loadScenarioList() {
+    try {
+      const res = await fetch("/api/scenarios");
+      if (res.ok) {
+        const list = await res.json();
+        list.forEach((m) => {
+          if (!state.scenarios.find((s) => s.id === m.id)) state.scenarios.push(m);
+        });
+      }
+    } catch (_) { /* list unavailable — dropdown stays empty until a scenario is generated */ }
+    refreshScenarioOptions();
   }
 
   init();
