@@ -1,4 +1,7 @@
-https://github.com/user-attachments/assets/97c946a8-39b4-4318-b9f9-39b9eeeeb6ab
+
+
+https://github.com/user-attachments/assets/fc7badba-2e6e-4537-908a-7e3e2545e01c
+
 
 # MikroTik Praktik - Guru & Juri AI
 
