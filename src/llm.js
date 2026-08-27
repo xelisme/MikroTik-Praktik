@@ -48,9 +48,11 @@ async function chat(messages, opts = {}) {
     body.max_tokens = opts.maxTokens || 8192;
   }
 
+  const headers = { 'Content-Type': 'application/json' };
+  if (s.apiKey) headers['Authorization'] = 'Bearer ' + s.apiKey;
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + s.apiKey },
+    headers,
     body: JSON.stringify(body)
   });
   if (!res.ok) {

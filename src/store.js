@@ -14,20 +14,42 @@ function writeJson(p, v) {
   try { fs.chmodSync(p, 0o600); } catch {}
 }
 
+const EXPIRY_MS = 30 * 60 * 1000; // LLM credentials auto-clear after 30 min for safety
+
 function getSettings() {
   const s = readJson(SETTINGS, {});
+  if (s.expiresAt && Date.now() > s.expiresAt) {
+    // credentials expired -> clear the secret from disk for safety
+    delete s.apiKey;
+    delete s.expiresAt;
+    writeJson(SETTINGS, s);
+    return {
+      baseURL: s.baseURL || '',
+      apiKey: '',
+      model: s.model || 'gpt-4o-mini',
+      configured: false,
+      expired: true,
+      expiresAt: null,
+    };
+  }
   return {
     baseURL: s.baseURL || '',
     apiKey: s.apiKey || '',
     model: s.model || 'gpt-4o-mini',
-    configured: !!(s.baseURL && s.apiKey)
+    configured: !!(s.baseURL && s.apiKey),
+    expired: false,
+    expiresAt: s.expiresAt || null,
   };
 }
 
 function saveSettings(s) {
   const cur = readJson(SETTINGS, {});
   if (s.baseURL !== undefined) cur.baseURL = s.baseURL;
-  if (s.apiKey !== undefined) cur.apiKey = s.apiKey;
+  if (s.apiKey !== undefined) {
+    cur.apiKey = s.apiKey;
+    if (s.apiKey) cur.expiresAt = Date.now() + EXPIRY_MS; // refresh 30-min window
+    else delete cur.expiresAt;
+  }
   if (s.model !== undefined) cur.model = s.model || 'gpt-4o-mini';
   writeJson(SETTINGS, cur);
 }

@@ -543,6 +543,36 @@ select:focus, input:focus, textarea:focus {
 .chat__input textarea { flex: 1; resize: none; min-height: 42px; max-height: 120px; line-height: 1.45; }
 .chat__send { flex: 0 0 auto; }
 
+/* ===================== Footer ===================== */
+.site-footer {
+  border-top: 1px solid var(--line);
+  background: #fff;
+  margin-top: 8px;
+}
+.site-footer__inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.site-footer__copy { font-size: .82rem; color: var(--ink-faint); }
+.site-footer__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--secondary-700);
+  text-decoration: none;
+  transition: color .14s ease;
+}
+.site-footer__link:hover { color: var(--primary); }
+.site-footer__link svg { display: block; }
+
 /* ===================== Responsive ===================== */
 @media (max-width: 720px) {
   .app-header__inner { padding: 10px 16px; }
@@ -556,4 +586,5 @@ select:focus, input:focus, textarea:focus {
 @media (max-width: 480px) {
   .combo { flex-direction: column; align-items: stretch; }
   .combo__sep { text-align: center; }
+  .site-footer__inner { flex-direction: column; text-align: center; gap: 8px; }
 }

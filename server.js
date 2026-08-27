@@ -18,7 +18,7 @@ app.use(express.static(PUBLIC));
 // ---- Settings ----
 app.get('/api/settings', (req, res) => {
   const s = store.getSettings();
-  res.json({ configured: s.configured, baseURL: s.baseURL, model: s.model });
+  res.json({ configured: s.configured, baseURL: s.baseURL, model: s.model, expiresAt: s.expiresAt });
 });
 app.post('/api/settings', (req, res) => {
   const { baseURL, apiKey, model } = req.body || {};
@@ -28,7 +28,7 @@ app.post('/api/settings', (req, res) => {
   const toSave = { baseURL, model };
   if (apiKey !== undefined && apiKey !== '') toSave.apiKey = apiKey;
   store.saveSettings(toSave);
-  res.json({ ok: true });
+  res.json({ ok: true, expiresAt: store.getSettings().expiresAt });
 });
 
 // ---- Scenario templates (from bank-skenario) ----
