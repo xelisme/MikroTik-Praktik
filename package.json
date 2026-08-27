@@ -1,8 +1,16 @@
 {
   "name": "soal-generator",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "MikroTik Praktik — Guru & Juri AI: student-first web app that generates MikroTik practice scenarios & jobsheets and grades real router configs via read-only SSH.",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xelisme/MikroTik-Praktik.git"
+  },
+  "homepage": "https://github.com/xelisme/MikroTik-Praktik#readme",
+  "bugs": {
+    "url": "https://github.com/xelisme/MikroTik-Praktik/issues"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
