@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/[[...slug]].js": {
+      "includeFiles": "references/**"
+    }
+  }
+}
