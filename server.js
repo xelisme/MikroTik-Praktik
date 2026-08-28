@@ -120,7 +120,12 @@ app.post('/api/assess/ssh', async (req, res) => {
 
   const scenario = scenarioId ? store.getScenario(scenarioId) : null;
   const commands = [];
-  if (scenario && Array.isArray(scenario.auditCommands)) commands.push(...scenario.auditCommands);
+  if (scenario && Array.isArray(scenario.auditCommands)) {
+    for (const c of scenario.auditCommands) {
+      if (ssh.isReadOnly(c)) commands.push(c.trim());
+      else return res.status(400).json({ error: 'Command skenario tidak diizinkan (harus read-only): ' + c });
+    }
+  }
   if (Array.isArray(extraCommands)) {
     for (const c of extraCommands) {
       if (ssh.isReadOnly(c)) commands.push(c.trim());

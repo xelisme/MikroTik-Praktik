@@ -47,11 +47,23 @@ ${m.cmd}
 ${srcSection}
 
 INSTRUKSI:
-- Level diminta: "${level}". Topik: "${topic || 'bebas'}" (kalau kosong, pilih topik jobsheet yang pas).
+- Level diminta: "${level}". Topik: "${topic || 'bebas'}".
 - Mode: ${modeNote}.
+
+ATURAN NAMA (PENTING):
+- Jika topik tidak kosong, topik ADALAH nama jobsheet/network secara harfiah. Gunakan sebagai nama di SELURUH langkah: SSID WiFi, nama hotspot server, address-pool, server profile, user profile, nama user, dan DNS name (login.<namalower>.net). JANGAN mengarang nama bisnis lain (mis. jangan pakai "Cafe Ngopi" kalau topik sudah menyebut nama lain).
+- Jika topik terlihat mengandung kata penyerta (mis. "taht the name"), ambil NAMA INTI-nya saja sebagai identitas.
+- Field "title" HARUS berbentuk "Jobsheet <NamaInti> (<LevelKapital>)", contoh: topik "Gay Louis Jew Hotspot", level "lanjut" -> "Jobsheet Gay Louis Jew Hotspot (Lanjut)".
+- Jika topik kosong, pilih topik yang masuk akal dan gunakan satu nama konsisten di seluruh tutorial.
+
+TINGKAT KESULITAN (wajib bedakan output per level — jangan hasilkan kedalaman sama untuk semua level):
+- pemula: 1 router, 1 WAN + 1 LAN/wlan. HANYA layanan inti (mis. DHCP client + NAT, atau hotspot sederhana 1 user). Langkah SANGAT rinci (tiap klik dijelaskan), tanpa asumsi pengetahuan. JANGAN sertakan mangle, queue tree, VLAN, atau user profile kompleks. 2-3 bagian, total 4-8 langkah. Latihan 3 soal sederhana.
+- menengah: tambahkan user profile (bandwidth limit), simple queue per-IP, manajemen beberapa user, monitoring, dan troubleshooting dasar (ping test). Asumsi murid paham Winbox. 3-5 bagian, total 8-14 langkah. Latihan 3-4 soal modifikasi.
+- lanjut: tambahkan queue tree + mangle prioritas (connection marking), VLAN/segmentasi, multi-interface, advanced user management, dan tuning performa. Asumsi murid MAHIR — kurangi "klik +" berlebihan, cukup navigasi singkat + referensi CLI. WAJIB ada bagian "Monitoring & Troubleshooting" dan konsep mendalam (QoS/prioritas). 5-8 bagian, total 14-25 langkah. Latihan 4-5 soal yang butuh desain/optimasi, bukan sekadar ikut.
+
 - Susun tutorial gaya jobsheet: pengantar (kenapa ini dipelajari), tujuan (poin yang dicapai setelah latihan), lalu bagian-bagian (A, B, C, ...) di mana tiap bagian berisi langkah praktik.
 - Tiap langkah berisi: "gui" (penjelasan menu Winbox, mis. "IP > DHCP Client > klik +") dan "cli" (perintah CLI lengkap, mis. "/ip dhcp-client add interface=ether1"). Untuk mode gui hanya isi gui, mode cli hanya isi cli, mode both isi keduanya. Isi "note" bila ada peringatan/ tips.
-- Tambahkan bagian "latihan" (3-5 latihan mandiri) dan "catatan" (tips/perhatian umum).
+- Tambahkan bagian "latihan" (jumlah sesuai level di atas) dan "catatan" (tips/perhatian umum; untuk lanjut sertakan catatan performa).
 - Ini tutorial, BUKAN soal — jangan sertakan kunci penilaian.
 
 Output HARUS JSON object persis:
@@ -90,7 +102,7 @@ async function generate(body, opts) {
     title: parsed.title || 'Tutorial Praktik',
     level: parsed.level || level,
     topic: parsed.topic || topic,
-    mode: parsed.mode || mode,
+    mode, // label reflects the mode the user explicitly requested
     pengantar: parsed.pengantar || '',
     tujuan: Array.isArray(parsed.tujuan) ? parsed.tujuan : [],
     bagian: Array.isArray(parsed.bagian) ? parsed.bagian : [],

@@ -590,3 +590,13 @@ select:focus, input:focus, textarea:focus {
   .combo__sep { text-align: center; }
   .site-footer__inner { flex-direction: column; text-align: center; gap: 8px; }
 }
+
+.active-tutorial-note {
+  margin-top: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: rgba(99, 102, 241, .14);
+  color: #c7d2fe;
+  font-size: .88rem;
+  line-height: 1.4;
+}

@@ -20,6 +20,7 @@
     sshAbort: null,       // AbortController for streaming
     sshContext: null,     // { host, output } from last live audit, for "Tanya AI"
     activeScenarioId: null,
+    activeTutorial: null,
     modeTouched: false,   // user has explicitly chosen an assess mode
   };
 
@@ -64,15 +65,37 @@
   }
 
   async function copyText(text, btn) {
+    let ok = false;
     try {
-      await navigator.clipboard.writeText(text);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        ok = true;
+      }
+    } catch (e) { /* fall through to legacy path */ }
+    if (!ok) {
+      // Fallback for non-secure contexts (e.g. accessing the app over LAN via http://192.168.x.x)
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.top = "-1000px";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+      } catch (e) { ok = false; }
+    }
+    if (ok) {
       if (btn) {
         const old = btn.textContent;
         btn.textContent = "Tersalin";
         btn.classList.add("is-done");
         setTimeout(() => { btn.textContent = old; btn.classList.remove("is-done"); }, 1400);
       }
-    } catch (e) {
+    } else {
       toast("Tidak bisa menyalin ke clipboard.", "err", "Copy gagal");
     }
   }
@@ -198,7 +221,7 @@
           el("div", { class: "tag-row" },
             el("span", { class: "tag" }, cap(d.level)),
             el("span", { class: "tag" }, d.topic || "Bebas"),
-            el("span", { class: "tag tag--mode" }, d.mode === "gui" ? "GUI Winbox" : "CLI")
+            el("span", { class: "tag tag--mode" }, modeLabel(d.mode))
           ),
           el("div", { class: "scenario-id-row" },
             el("span", { class: "scenario-id" }, "ID: " + d.id),
@@ -243,9 +266,20 @@
     const current = sel.value;
     sel.innerHTML = "";
     sel.appendChild(el("option", { value: "" }, "— pilih skenario hasil generate —"));
-    state.scenarios.forEach((s) => {
-      sel.appendChild(el("option", { value: s.id }, `${s.title} (${cap(s.level)})`));
-    });
+    if (state.scenarios.length) {
+      const g = el("optgroup", { label: "Skenario" });
+      state.scenarios.forEach((s) => {
+        g.appendChild(el("option", { value: s.id, "data-kind": "scenario" }, `${s.title} (${cap(s.level)})`));
+      });
+      sel.appendChild(g);
+    }
+    if (state.tutorials.length) {
+      const g = el("optgroup", { label: "Jobsheet / Tutorial" });
+      state.tutorials.forEach((t) => {
+        g.appendChild(el("option", { value: t.id, "data-kind": "tutorial" }, `Jobsheet: ${t.title} (${cap(t.level)})`));
+      });
+      sel.appendChild(g);
+    }
     sel.value = current || "";
   }
 
@@ -275,13 +309,61 @@
   });
 
   function onScenarioSelected(id) {
-    state.activeScenarioId = id;
     const sc = state.scenarios.find((s) => s.id === id);
-    state.currentScenario = sc || null;
-    if (sc && sc.mode && !state.modeTouched) {
-      const r = $(`input[name="assess-mode"][value="${sc.mode}"]`);
-      if (r) r.checked = true;
+    const tut = sc ? null : state.tutorials.find((t) => t.id === id);
+    if (sc) {
+      state.activeScenarioId = id;
+      state.activeTutorial = null;
+      state.currentScenario = sc;
+      if (sc.mode && !state.modeTouched) {
+        const r = $(`input[name="assess-mode"][value="${sc.mode}"]`);
+        if (r) r.checked = true;
+      }
+    } else if (tut) {
+      state.activeTutorial = tut;
+      state.activeScenarioId = null;
+      state.currentScenario = null;
+      if (tut.mode && !state.modeTouched) {
+        const r = $(`input[name="assess-mode"][value="${tut.mode}"]`);
+        if (r) r.checked = true;
+      }
+      prefillSshExtraForTutorial(tut);
     }
+    updateActiveTutorialNote();
+  }
+
+  function updateActiveTutorialNote() {
+    const note = $("#active-tutorial-note");
+    if (!note) return;
+    if (state.activeTutorial) {
+      note.hidden = false;
+      note.textContent = "Jobsheet aktif: " + state.activeTutorial.title + " — tempel hasil router atau jalankan SSH Live untuk dinilai.";
+    } else {
+      note.hidden = true;
+    }
+  }
+
+  function defaultAuditCommands(tut) {
+    const t = (tut && tut.topic ? tut.topic : "").toLowerCase();
+    const base = ["/export terse", "/interface print", "/ip address print", "/ip route print",
+      "/ip firewall filter print", "/ip firewall mangle print", "/queue print", "/system resource print"];
+    if (/hotspot/.test(t)) {
+      return ["/export terse", "/ip hotspot print", "/ip hotspot user print", "/ip hotspot active print",
+        "/ip firewall filter print", "/ip firewall nat print", "/queue print", "/interface print", "/ip address print"];
+    }
+    if (/vlan|segment/.test(t)) {
+      return ["/export terse", "/interface vlan print", "/interface bridge print", "/ip address print", "/ip route print"];
+    }
+    if (/queue|qos|prior/.test(t)) {
+      return ["/export terse", "/queue print", "/queue tree print", "/ip firewall mangle print", "/interface print"];
+    }
+    return base;
+  }
+
+  function prefillSshExtraForTutorial(tut) {
+    const ta = $("#ssh-extra");
+    if (!ta || ta.value.trim()) return; // don't overwrite user input
+    ta.value = defaultAuditCommands(tut).join("\n");
   }
 
   // remember explicit mode choice so scenario selection doesn't clobber it
@@ -292,11 +374,7 @@
   /* ---------- SSH Live streaming ---------- */
   $("#form-ssh").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const scenarioId = state.activeScenarioId || $("#assess-scenario").value || $("#assess-scenario-id").value.trim();
-    if (!scenarioId) {
-      toast("Pilih atau tempel skenario dulu.", "err", "Skenario kosong");
-      return;
-    }
+    const { scenarioId, tutorialContext } = getAssessmentContext();
     const host = $("#ssh-host").value.trim();
     const port = parseInt($("#ssh-port").value, 10) || 22;
     const user = $("#ssh-user").value.trim();
@@ -306,6 +384,13 @@
     const extraCommands = $("#ssh-extra").value
       .split("\n").map((s) => s.trim()).filter(Boolean);
 
+    if (!scenarioId && !extraCommands.length) {
+      const msg = state.activeTutorial
+        ? "Jobsheet tidak punya audit command bawaan. Isi Perintah tambahan dengan command READ-ONLY (mis. /export terse) untuk menilai via SSH."
+        : "Pilih skenario (dengan audit command) atau isi Perintah tambahan.";
+      toast(msg, "err", "Konteks kosong");
+      return;
+    }
     if (!host || !user || (authType === "password" && !password) || (authType === "key" && !key)) {
       toast("Lengkapi host, user, dan kredensial.", "err", "Input kurang");
       return;
@@ -396,7 +481,7 @@
         state.sshContext = { host, output: fullOutput };
         const askBtn = $("#btn-ssh-ask");
         if (askBtn) askBtn.hidden = false;
-        await analyzeAndRender(scenarioId, getAssessMode(), fullOutput);
+        await analyzeAndRender(scenarioId, getAssessMode(), fullOutput, tutorialContext);
       } else {
         toast("Tidak ada output yang didapat dari router.", "err", "Kosong");
       }
@@ -427,9 +512,9 @@
   /* ---------- Paste output ---------- */
   $("#form-paste").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const scenarioId = state.activeScenarioId || $("#assess-scenario").value || $("#assess-scenario-id").value.trim();
+    const { scenarioId, tutorialContext } = getAssessmentContext();
     const output = $("#paste-output").value.trim();
-    if (!scenarioId) { toast("Pilih atau tempel skenario dulu.", "err", "Skenario kosong"); return; }
+    if (!scenarioId && !tutorialContext) { toast("Pilih skenario atau jobsheet dulu.", "err", "Konteks kosong"); return; }
     if (!output) { toast("Tempel hasil output router dulu.", "err", "Output kosong"); return; }
 
     const btn = $("#btn-paste");
@@ -437,7 +522,7 @@
     const prev = btn.querySelector(".btn__label").textContent;
     btn.querySelector(".btn__label").textContent = "Menilai…";
     try {
-      await analyzeAndRender(scenarioId, getAssessMode(), output);
+      await analyzeAndRender(scenarioId, getAssessMode(), output, tutorialContext);
     } finally {
       btn.disabled = false; btn.classList.remove("is-loading");
       btn.querySelector(".btn__label").textContent = prev;
@@ -448,15 +533,24 @@
     return $('input[name="assess-mode"]:checked').value;
   }
 
+  function getAssessmentContext() {
+    const sel = $("#assess-scenario");
+    const kind = sel.selectedOptions[0] && sel.selectedOptions[0].dataset.kind;
+    let scenarioId = state.activeScenarioId || sel.value || $("#assess-scenario-id").value.trim();
+    const tutorialContext = state.activeTutorial || null;
+    if (kind === "tutorial") scenarioId = "";
+    return { scenarioId, tutorialContext };
+  }
+
   /* ---------- Analyze + render results ---------- */
-  async function analyzeAndRender(scenarioId, mode, output) {
+  async function analyzeAndRender(scenarioId, mode, output, tutorialContext) {
     const results = $("#results");
     results.hidden = true;
     try {
       const res = await fetch("/api/assess/paste", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scenarioId, mode, output }),
+        body: JSON.stringify({ scenarioId, mode, output, tutorialContext: tutorialContext || undefined }),
       });
       if (!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
@@ -711,9 +805,23 @@
     // Jump to Nilai Konfigurasi
     box.appendChild(el("button", {
       class: "btn btn--primary open-assess-btn", type: "button",
-      onclick: () => showView("nilai"),
+      onclick: () => {
+        state.activeTutorial = d;
+        state.activeScenarioId = null;
+        if (![...$("#assess-scenario").options].some((o) => o.value === d.id)) refreshScenarioOptions();
+        $("#assess-scenario").value = d.id;
+        if (d.mode && !state.modeTouched) {
+          const r = $(`input[name="assess-mode"][value="${d.mode}"]`);
+          if (r) r.checked = true;
+        }
+        updateActiveTutorialNote();
+        prefillSshExtraForTutorial(d);
+        showView("nilai");
+        toast("Jobsheet aktif: " + d.title, "ok");
+      },
     }, "Latihan di Router → Nilai Hasil"));
 
+    refreshScenarioOptions();
     box.hidden = false;
     box.scrollIntoView({ behavior: "smooth", block: "start" });
   }
