@@ -365,8 +365,10 @@
         buffer = lines.pop(); // keep partial line
         for (const line of lines) {
           if (!line.trim()) continue;
+          let raw = line;
+          if (raw.startsWith("data:")) raw = raw.slice(5).trim();
           let evt;
-          try { evt = JSON.parse(line); } catch { continue; }
+          try { evt = JSON.parse(raw); } catch { continue; }
           handleSSE(evt);
         }
       }
