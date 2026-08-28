@@ -1,6 +1,10 @@
 {
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" }
+  ],
   "functions": {
-    "api/[[...slug]].js": {
+    "api/index.js": {
       "includeFiles": "references/**",
       "maxDuration": 60
     }
