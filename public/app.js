@@ -280,8 +280,9 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ level, topic, mode, notes }),
         });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const data = await res.json();
+        let data = {};
+        try { data = await res.json(); } catch (_) {}
+        if (!res.ok) throw new Error(data.error || ("HTTP " + res.status));
 
         // keep in memory
         const existing = state.scenarios.find((s) => s.id === data.id);
@@ -294,7 +295,7 @@
         toast("Skenario berhasil dibuat.", "ok", "Selesai");
       });
     } catch (err) {
-      toast("Tidak bisa membuat skenario. Periksa koneksi atau settings AI.", "err", "Generate gagal");
+      toast("Generate gagal: " + (err.message || "cek koneksi/settings AI"), "err", "Generate gagal");
     }
   });
 
@@ -733,8 +734,9 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ level, topic, mode, source }),
         });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const data = await res.json();
+        let data = {};
+        try { data = await res.json(); } catch (_) {}
+        if (!res.ok) throw new Error(data.error || ("HTTP " + res.status));
 
         const existing = state.tutorials.find((t) => t.id === data.id);
         if (!existing) state.tutorials.push(data);
@@ -744,7 +746,7 @@
         toast("Tutorial berhasil dibuat.", "ok", "Selesai");
       });
     } catch (err) {
-      toast("Tidak bisa membuat tutorial. Periksa koneksi atau settings AI.", "err", "Generate gagal");
+      toast("Generate gagal: " + (err.message || "cek koneksi/settings AI"), "err", "Generate gagal");
     }
   });
 
