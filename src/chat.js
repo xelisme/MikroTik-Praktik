@@ -31,8 +31,14 @@ function buildSystemPrompt(context = {}) {
     }
   }
 
-  if (!context.scenario && !context.tutorial) {
-    ctxBlock += '\n- Tidak ada soal/tutorial spesifik dibuka; jawab sebagai asisten umum praktik MikroTik.';
+  if (context.ssh && context.ssh.output) {
+    ctxBlock += '\n- Hasil audit SSH langsung dari router (view SSH Live):';
+    if (context.ssh.host) ctxBlock += `\n  Host: ${context.ssh.host}`;
+    ctxBlock += `\n  Output perintah read-only:\n${context.ssh.output}`;
+  }
+
+  if (!context.scenario && !context.tutorial && !context.ssh) {
+    ctxBlock += '\n- Tidak ada soal/tutorial/audit spesifik dibuka; jawab sebagai asisten umum praktik MikroTik.';
   }
 
   return `Kamu adalah Asisten AI untuk aplikasi "MikroTik Praktik — Guru & Juri AI", alat bantu guru dan siswa praktik MikroTik (RouterOS). Peranmu: menjelaskan konsep MikroTik, langkah konfigurasi, perintah CLI maupun langkah GUI Winbox, dan membantu siswa memahami soal atau tutorial yang sedang mereka kerjakan.

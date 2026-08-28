@@ -18,6 +18,7 @@
     chatBusy: false,
     currentView: "buat",
     sshAbort: null,       // AbortController for streaming
+    sshContext: null,     // { host, output } from last live audit, for "Tanya AI"
     activeScenarioId: null,
     modeTouched: false,   // user has explicitly chosen an assess mode
   };
@@ -388,8 +389,11 @@
         }
       }
 
-      // After done, analyze
+      // After done, analyze + enable "Tanya AI"
       if (fullOutput.trim()) {
+        state.sshContext = { host, output: fullOutput };
+        const askBtn = $("#btn-ssh-ask");
+        if (askBtn) askBtn.hidden = false;
         await analyzeAndRender(scenarioId, getAssessMode(), fullOutput);
       } else {
         toast("Tidak ada output yang didapat dari router.", "err", "Kosong");
@@ -412,6 +416,10 @@
 
   $("#btn-stop").addEventListener("click", () => {
     if (state.sshAbort) state.sshAbort.abort();
+  });
+
+  $("#btn-ssh-ask").addEventListener("click", () => {
+    openChat("ssh");
   });
 
   /* ---------- Paste output ---------- */
@@ -819,16 +827,19 @@
     box.scrollTop = box.scrollHeight;
   }
 
-  function openChat() {
+  function openChat(seed) {
     if (state.chatOpen) return;
     state.chatOpen = true;
     $("#chat").hidden = false;
     $("#chat-bubble").hidden = true;
     if (state.chat.length === 0) {
-      state.chat.push({
-        role: "assistant",
-        content: "Halo! Saya asisten AI untuk latihan MikroTik kamu. Tanya apa saja tentang soal, tutorial, atau konfigurasi router — saya tahu konteks yang sedang kamu buka.",
-      });
+      let greeting;
+      if (seed === "ssh" && state.sshContext && state.sshContext.output) {
+        greeting = `Saya melihat hasil audit SSH langsung dari ${state.sshContext.host || "router"}. Tanya apa saja tentang state router ini — mis. "kenapa Queue Tree VoIP drop?" atau "bagaimana cara fix agar sesuai skenario?"`;
+      } else {
+        greeting = "Halo! Saya asisten AI untuk latihan MikroTik kamu. Tanya apa saja tentang soal, tutorial, atau konfigurasi router — saya tahu konteks yang sedang kamu buka.";
+      }
+      state.chat.push({ role: "assistant", content: greeting });
       renderChatHistory();
     }
     setTimeout(() => $("#chat-text").focus(), 60);
@@ -866,6 +877,7 @@
         tutorial: (state.tutorials && state.tutorials.length)
           ? state.tutorials[state.tutorials.length - 1]
           : null,
+        ssh: state.sshContext || null,
       },
     };
 
