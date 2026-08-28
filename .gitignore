@@ -8,3 +8,8 @@ data/
 .env
 .env.*
 strix_runs/
+
+# generated / local artifacts
+demo/
+graphify-out/
+PATHFINDER-*/
