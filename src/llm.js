@@ -50,20 +50,36 @@ async function chat(messages, opts = {}) {
 
   const headers = { 'Content-Type': 'application/json' };
   if (s.apiKey) headers['Authorization'] = 'Bearer ' + s.apiKey;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body)
-  });
+
+  // Transport timeout so a hung LLM endpoint fails fast instead of hanging the request.
+  const controller = new AbortController();
+  const timeoutMs = opts.timeoutMs || 60000;
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let res;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+      signal: controller.signal
+    });
+  } catch (e) {
+    clearTimeout(timer);
+    if (e.name === 'AbortError') throw new Error('Permintaan ke LLM melebihi batas waktu (' + timeoutMs + ' ms).');
+    throw e;
+  }
+  clearTimeout(timer);
+
   if (!res.ok) {
     const t = await res.text();
     throw new Error('LLM error ' + res.status + ': ' + t.slice(0, 400));
   }
-  // Endpoint may append SSE markers (e.g. "data: [DONE]"); extract the JSON object.
+  // Endpoint may append SSE markers (e.g. "data: [DONE]"); extract the JSON envelope.
   const text = await res.text();
   const data = extractJSON(text);
   const msg = (data.choices && data.choices[0] && data.choices[0].message) || {};
   // Reasoning models may leave content empty and put the answer in reasoning_content.
+  // Return the message content directly — do NOT run free-form replies through extractJSON.
   return msg.content || msg.reasoning_content || '';
 }
 
@@ -81,8 +97,4 @@ async function complete(messages, opts = {}) {
   throw lastErr || new Error('Gagal mendapatkan JSON dari AI setelah beberapa percobaan.');
 }
 
-function parseJSON(text) {
-  return extractJSON(text);
-}
-
-module.exports = { chat, complete, parseJSON };
+module.exports = { chat, complete, extractJSON };

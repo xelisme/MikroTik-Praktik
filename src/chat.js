@@ -4,7 +4,7 @@ const materials = require('./materials');
 // Build a system prompt that gives the assistant MikroTik domain knowledge
 // plus the live context of what the user is currently looking at in the app.
 function buildSystemPrompt(context = {}) {
-  const m = materials.loadAll();
+  const mBlock = materials.buildMaterialsBlock({ cmd: true, gui: true, audit: true });
   const view = context.view || 'unknown';
 
   let ctxBlock = `Konteks antarmuka saat ini:\n- View aktif: ${view}`;
@@ -50,9 +50,7 @@ Gaya:
 - Manfaatkan konteks di bawah untuk menjawab secara spesifik terhadap apa yang sedang dilihat pengguna.
 
 === REFERENSI DOMAIN MIKROTIK (pengetahuanmu) ===
-${m.cmd}
-${m.gui}
-${m.audit}
+${mBlock}
 === KONTEKS SAAT INI ===
 ${ctxBlock}
 

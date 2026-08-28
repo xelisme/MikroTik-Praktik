@@ -18,22 +18,24 @@ app.use(cookieParser(process.env.COOKIE_SECRET || 'dev-insecure-secret-change-me
 // Settings panel). Falls back to env / on-disk settings when no cookie is present.
 // On Vercel the filesystem is read-only, so the cookie is the only way to bring
 // your own key — and it auto-expires after 30 min (per-session, gone after 30m).
-const EXPIRY_MS = 30 * 60 * 1000;
 app.use((req, res, next) => {
   const c = req.signedCookies && req.signedCookies.llm_settings;
   if (c && c.baseURL && c.apiKey) {
-    const expiresAt = (c.issuedAt || Date.now()) + EXPIRY_MS;
+    const expiresAt = (c.issuedAt || Date.now()) + store.EXPIRY_MS;
     if (Date.now() < expiresAt) {
-      req.llmSettings = {
-        baseURL: c.baseURL, apiKey: c.apiKey, model: c.model || 'gpt-4o-mini',
-        configured: true, source: 'settings', expiresAt
-      };
+      req.llmSettings = store.makeSettings({
+        baseURL: c.baseURL, apiKey: c.apiKey, model: c.model || store.DEFAULT_MODEL,
+        source: 'settings', expiresAt
+      });
       return next();
     }
   }
   req.llmSettings = store.getSettings();
   next();
 });
+
+// Wrap async route handlers so thrown errors become a 500 JSON response.
+const asyncHandler = (fn) => (req, res) => Promise.resolve(fn(req, res)).catch(e => res.status(500).json({ error: e.message }));
 
 const PUBLIC = path.join(__dirname, 'public');
 // Serve ./public from within the function — works both locally and on Vercel.
@@ -56,11 +58,11 @@ app.post('/api/settings', (req, res) => {
   // Session cookie: httpOnly + signed, auto-clears after 30 min. Works on Vercel
   // (read-only fs) because nothing is written to disk.
   res.cookie('llm_settings', payload, {
-    maxAge: EXPIRY_MS, httpOnly: true, sameSite: 'lax', signed: true, path: '/'
+    maxAge: store.EXPIRY_MS, httpOnly: true, sameSite: 'lax', signed: true, path: '/'
   });
   // Best-effort local persistence (no-op on read-only fs like Vercel).
   try { store.saveSettings(payload); } catch (e) {}
-  res.json({ ok: true, expiresAt: payload.issuedAt + EXPIRY_MS });
+  res.json({ ok: true, expiresAt: payload.issuedAt + store.EXPIRY_MS });
 });
 
 // ---- Scenario templates (from bank-skenario) ----
@@ -69,43 +71,35 @@ app.get('/api/scenario-templates', (req, res) => {
 });
 
 // ---- Generate scenario ----
-app.post('/api/scenarios/generate', async (req, res) => {
-  try {
-    const view = await scenarios.generate(req.body || {}, { settings: req.llmSettings });
-    res.json(view);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+app.post('/api/scenarios/generate', asyncHandler(async (req, res) => {
+  const view = await scenarios.generate(req.body || {}, { settings: req.llmSettings });
+  res.json(view);
+}));
 
 // ---- Get scenario (student view, no hidden criteria) ----
 app.get('/api/scenarios/:id', (req, res) => {
-  const full = store.getScenario(req.params.id);
+  const full = store.scenarios.get(req.params.id);
   if (!full) return res.status(404).json({ error: 'Skenario tidak ditemukan.' });
   res.json(scenarios.publicView(full));
 });
 
 // ---- List scenarios (metadata only, no hidden criteria) ----
 app.get('/api/scenarios', (req, res) => {
-  res.json(store.listScenarioMeta());
+  res.json(store.scenarios.list());
 });
 
 // ---- Tutorial / Latihan sources (jobsheet PDFs) ----
 app.get('/api/tutorial-sources', (req, res) => res.json(tutorial.listSources()));
 
 // ---- Generate tutorial ----
-app.post('/api/tutorials/generate', async (req, res) => {
-  try {
-    const v = await tutorial.generate(req.body || {}, { settings: req.llmSettings });
-    res.json(v);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+app.post('/api/tutorials/generate', asyncHandler(async (req, res) => {
+  const v = await tutorial.generate(req.body || {}, { settings: req.llmSettings });
+  res.json(v);
+}));
 
 // ---- Get tutorial (public view) ----
 app.get('/api/tutorials/:id', (req, res) => {
-  const full = store.getTutorial(req.params.id);
+  const full = store.tutorials.get(req.params.id);
   if (!full) return res.status(404).json({ error: 'Tutorial tidak ditemukan.' });
   res.json(tutorial.publicView(full));
 });
@@ -118,7 +112,7 @@ app.post('/api/assess/ssh', async (req, res) => {
     return res.status(400).json({ error: 'auth tidak lengkap (password atau private key).' });
   }
 
-  const scenario = scenarioId ? store.getScenario(scenarioId) : null;
+  const scenario = scenarioId ? store.scenarios.get(scenarioId) : null;
   const commands = [];
   if (scenario && Array.isArray(scenario.auditCommands)) {
     for (const c of scenario.auditCommands) {
@@ -160,40 +154,21 @@ app.post('/api/assess/ssh', async (req, res) => {
 });
 
 // ---- Assess via pasted output ----
-app.post('/api/assess/paste', async (req, res) => {
-  try {
-    const { scenarioId, mode, output, tutorialContext } = req.body || {};
-    const result = await assess.analyze({ scenarioId, mode, output, tutorialContext, settings: req.llmSettings });
-    res.json(result);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-// ---- Analyze (used after SSH stream finishes) ----
-app.post('/api/assess/analyze', async (req, res) => {
-  try {
-    const { scenarioId, mode, output } = req.body || {};
-    const result = await assess.analyze({ scenarioId, mode, output, settings: req.llmSettings });
-    res.json(result);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+app.post('/api/assess/paste', asyncHandler(async (req, res) => {
+  const { scenarioId, mode, output, tutorialContext } = req.body || {};
+  const result = await assess.analyze({ scenarioId, mode, output, tutorialContext, settings: req.llmSettings });
+  res.json(result);
+}));
 
 // ---- AI chat assistant (context-aware) ----
-app.post('/api/chat', async (req, res) => {
-  try {
-    const { messages, context } = req.body || {};
-    if (!Array.isArray(messages) || !messages.length) {
-      return res.status(400).json({ error: 'messages wajib diisi.' });
-    }
-    const replyText = await chat.reply(messages, context || {}, { settings: req.llmSettings });
-    res.json({ reply: replyText });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+app.post('/api/chat', asyncHandler(async (req, res) => {
+  const { messages, context } = req.body || {};
+  if (!Array.isArray(messages) || !messages.length) {
+    return res.status(400).json({ error: 'messages wajib diisi.' });
   }
-});
+  const replyText = await chat.reply(messages, context || {}, { settings: req.llmSettings });
+  res.json({ reply: replyText });
+}));
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 

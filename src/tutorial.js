@@ -29,7 +29,7 @@ async function readSource(name) {
 }
 
 function buildTutorialPrompt({ level, topic, mode, sourceText }) {
-  const m = materials.loadAll();
+  const mBlock = materials.buildMaterialsBlock({ cmd: true, gui: mode === 'gui' || mode === 'both' });
   const modeNote =
     mode === 'gui' ? 'HANYA Winbox GUI (jelaskan lewat menu Winbox)' :
     mode === 'cli' ? 'HANYA CLI Terminal (berikan perintah lengkap)' :
@@ -41,9 +41,7 @@ function buildTutorialPrompt({ level, topic, mode, sourceText }) {
 
   return `Kamu adalah guru praktik MikroTik RouterOS. Buatkan TUTORIAL/LATIHAN (bukan soal ujian) berbentuk jobsheet yang jelas agar murid bisa mempraktikkan langsung di router.
 
-MATERI ACUAN (pakai sebagai sumber kebenaran command, jangan mengarang di luar command-reference):
-===== COMMAND REFERENCE =====
-${m.cmd}
+${mBlock}
 ${srcSection}
 
 INSTRUKSI:
@@ -78,7 +76,8 @@ Output HARUS JSON object persis:
   "latihan": [string],
   "catatan": string
 }
-Balas HANYA JSON, tanpa teks lain dan tanpa markdown fence.`;
+
+${materials.jsonOutputInstruction()}`;
 }
 
 async function generate(body, opts) {
@@ -109,7 +108,7 @@ async function generate(body, opts) {
     latihan: Array.isArray(parsed.latihan) ? parsed.latihan : [],
     catatan: parsed.catatan || ''
   };
-  store.putTutorial(full);
+  store.tutorials.put(full);
   return publicView(full);
 }
 

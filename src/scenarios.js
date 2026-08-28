@@ -61,17 +61,10 @@ Tier 2 (Full Scan - pilih yang relevan):
 `;
 
 function buildGeneratePrompt({ level, topic, mode, notes }) {
-  const m = materials.loadAll();
+  const mBlock = materials.buildMaterialsBlock({ bank: true, cmd: true, audit: true, extracted: true });
   return `Kamu adalah guru sekaligus juri praktik MikroTik RouterOS. Tugasmu membuat soal praktik berbentuk studi kasus perusahaan yang realistis, lalu nanti menilai konfigurasi murid secara READ-ONLY.
 
-MATERI ACUAN (pakai sebagai sumber kebenaran, jangan mengarang command di luar command-reference):
-===== BANK SKENARIO =====
-${m.bank}
-===== COMMAND REFERENCE =====
-${m.cmd}
-===== CHECKLIST AUDIT =====
-${m.audit}
-${m.extracted}
+${mBlock}
 
 INSTRUKSI PEMBUATAN SOAL:
 - Level diminta: "${level}". Topik diminta: "${topic}".${notes ? ' Catatan murid: "' + notes + '".' : ''}
@@ -96,7 +89,9 @@ Output HARUS JSON object persis dengan field:
   "auditTier": "hotspot"|"tier1"|"tier2",
   "auditCommands": [ string ]
 }
-Mode = "${mode}". Balas HANYA JSON, tanpa teks lain dan tanpa markdown fence.`;
+Mode = "${mode}".
+
+${materials.jsonOutputInstruction()}`;
 }
 
 async function generate(body, opts) {
@@ -121,7 +116,7 @@ async function generate(body, opts) {
     auditTier: parsed.auditTier || 'tier1',
     auditCommands: Array.isArray(parsed.auditCommands) ? parsed.auditCommands : []
   };
-  store.putScenario(full);
+  store.scenarios.put(full);
   return publicView(full);
 }
 

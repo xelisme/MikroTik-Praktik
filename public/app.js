@@ -100,6 +100,125 @@
     }
   }
 
+  /* ---------------- Unified frontend helpers (U4) ---------------- */
+  // Toggle a button into a busy/loading state, run fn(), then restore it.
+  async function withButton(btn, busyLabel, fn) {
+    const labelEl = btn.querySelector(".btn__label");
+    const prev = labelEl ? labelEl.textContent : btn.textContent;
+    btn.disabled = true;
+    btn.classList.add("is-loading");
+    if (labelEl) labelEl.textContent = busyLabel;
+    else btn.textContent = busyLabel;
+    try {
+      await fn();
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove("is-loading");
+      if (labelEl) labelEl.textContent = prev;
+      else btn.textContent = prev;
+    }
+  }
+
+  // Properly parse Server-Sent Events delimited by blank lines ("\n\n").
+  // The server emits: 'data: ' + JSON.stringify(obj) + '\n\n'
+  async function readSSE(response, onEvent) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split("\n\n");
+      buffer = parts.pop(); // keep last (possibly partial) event
+      for (const part of parts) {
+        const trimmed = part.trim();
+        if (!trimmed) continue;
+        let raw = trimmed;
+        if (raw.startsWith("data:")) raw = raw.slice(5).trim();
+        try { onEvent(JSON.parse(raw)); } catch (_) { /* ignore malformed */ }
+      }
+    }
+    const tail = buffer.trim();
+    if (tail) {
+      let raw = tail;
+      if (raw.startsWith("data:")) raw = raw.slice(5).trim();
+      try { onEvent(JSON.parse(raw)); } catch (_) {}
+    }
+  }
+
+  // Fetch `url`, fill `sel` with options (emptyLabel first). labelFn(item)
+  // returns { value, text } for each item; falsy values are skipped.
+  async function populateSelect(sel, url, emptyLabel, labelFn, errTitle) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const list = await res.json();
+      const items = Array.isArray(list) ? list : [];
+      sel.innerHTML = "";
+      sel.appendChild(el("option", { value: "" }, emptyLabel));
+      items.forEach((item) => {
+        const r = labelFn(item);
+        if (!r || r.value == null || r.value === "") return;
+        const value = r.value;
+        const text = r.text != null ? r.text : r.value;
+        sel.appendChild(el("option", { value }, text));
+      });
+    } catch (e) {
+      sel.innerHTML = "";
+      sel.appendChild(el("option", { value: "" }, emptyLabel));
+      toast("Gagal memuat daftar dari server.", "err", errTitle);
+    }
+  }
+
+  // Build the shared result-header card (title + tag-row + id + Salin ID + open-in-assess).
+  function renderResultHeader(d, isTutorial = false) {
+    const openBtn = el("button", {
+      class: "btn btn--primary open-assess-btn", type: "button",
+      onclick: () => activateAndAssess({ id: d.id, tutorial: isTutorial }),
+    }, "Buka di Nilai Konfigurasi →");
+    return el("div", { class: "card" },
+      el("div", { class: "scenario-head" },
+        el("div", {},
+          el("h2", {}, d.title || (isTutorial ? "Tutorial" : "Skenario")),
+          el("div", { class: "tag-row" },
+            el("span", { class: "tag" }, cap(d.level)),
+            el("span", { class: "tag" }, d.topic || "Bebas"),
+            el("span", { class: "tag tag--mode" }, modeLabel(d.mode))
+          ),
+          el("div", { class: "scenario-id-row" },
+            el("span", { class: "scenario-id" }, "ID: " + d.id),
+            el("button", { class: "copy-btn", type: "button", onclick: (ev) => copyText(d.id, ev.currentTarget) }, "Salin ID")
+          )
+        )
+      ),
+      openBtn
+    );
+  }
+
+  // Navigate to Nilai, ensure the item is listed, select it, and activate it.
+  function activateAndAssess({ id, tutorial }) {
+    showView("nilai");
+    const sel = $("#assess-scenario");
+    if (![...sel.options].some((o) => o.value === id)) {
+      refreshScenarioOptions();
+    }
+    sel.value = id;
+    onScenarioSelected(id);
+    if (tutorial) {
+      const t = state.tutorials.find((x) => x.id === id);
+      if (t) toast("Jobsheet aktif: " + t.title, "ok");
+    }
+  }
+
+  // Apply the assess-mode radio for a given mode (unless the user overrode it).
+  function applyModeRadio(mode) {
+    if (mode && !state.modeTouched) {
+      const r = $(`input[name="assess-mode"][value="${mode}"]`);
+      if (r) r.checked = true;
+    }
+  }
+
   /* ---------------- View switching ---------------- */
   function showView(name) {
     state.currentView = name;
@@ -135,24 +254,13 @@
      VIEW 1 — Buat Soal
      ========================================================= */
   async function loadTemplates() {
-    const sel = $("#gen-topic");
-    try {
-      const res = await fetch("/api/scenario-templates");
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const list = await res.json();
-      state.templates = Array.isArray(list) ? list : [];
-
-      sel.innerHTML = "";
-      sel.appendChild(el("option", { value: "" }, "Bebas (ai pilih)"));
-      state.templates.forEach((t) => {
-        const label = `${t.title} — ${cap(t.level)}`;
-        sel.appendChild(el("option", { value: t.title }, label));
-      });
-    } catch (e) {
-      sel.innerHTML = "";
-      sel.appendChild(el("option", { value: "" }, "Bebas (ai pilih)"));
-      toast("Gagal memuat daftar topik dari server.", "err", "Template");
-    }
+    await populateSelect(
+      $("#gen-topic"),
+      "/api/scenario-templates",
+      "Bebas (ai pilih)",
+      (t) => ({ value: t.title, text: `${t.title} — ${cap(t.level)}` }),
+      "Template"
+    );
   }
 
   function cap(s) { return String(s || "").charAt(0).toUpperCase() + String(s || "").slice(1); }
@@ -165,35 +273,28 @@
     const mode = $('input[name="mode"]:checked').value;
     const notes = $("#gen-notes").value.trim() || undefined;
 
-    btn.disabled = true;
-    btn.classList.add("is-loading");
-    const prev = btn.querySelector(".btn__label").textContent;
-    btn.querySelector(".btn__label").textContent = "Membuat…";
-
     try {
-      const res = await fetch("/api/scenarios/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ level, topic, mode, notes }),
+      await withButton(btn, "Membuat…", async () => {
+        const res = await fetch("/api/scenarios/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ level, topic, mode, notes }),
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+
+        // keep in memory
+        const existing = state.scenarios.find((s) => s.id === data.id);
+        if (!existing) state.scenarios.push(data);
+        else Object.assign(existing, data);
+        state.activeScenarioId = data.id;
+        state.currentScenario = existing || data;
+
+        renderScenarioResult(data);
+        toast("Skenario berhasil dibuat.", "ok", "Selesai");
       });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const data = await res.json();
-
-      // keep in memory
-      const existing = state.scenarios.find((s) => s.id === data.id);
-      if (!existing) state.scenarios.push(data);
-      else Object.assign(existing, data);
-      state.activeScenarioId = data.id;
-      state.currentScenario = existing || data;
-
-      renderScenarioResult(data);
-      toast("Skenario berhasil dibuat.", "ok", "Selesai");
     } catch (err) {
       toast("Tidak bisa membuat skenario. Periksa koneksi atau settings AI.", "err", "Generate gagal");
-    } finally {
-      btn.disabled = false;
-      btn.classList.remove("is-loading");
-      btn.querySelector(".btn__label").textContent = prev;
     }
   });
 
@@ -214,48 +315,19 @@
     const box = $("#scenario-result");
     box.innerHTML = "";
 
-    const head = el("div", { class: "card" },
-      el("div", { class: "scenario-head" },
-        el("div", {},
-          el("h2", {}, d.title || "Skenario"),
-          el("div", { class: "tag-row" },
-            el("span", { class: "tag" }, cap(d.level)),
-            el("span", { class: "tag" }, d.topic || "Bebas"),
-            el("span", { class: "tag tag--mode" }, modeLabel(d.mode))
-          ),
-          el("div", { class: "scenario-id-row" },
-            el("span", { class: "scenario-id" }, "ID: " + d.id),
-            el("button", { class: "copy-btn", type: "button", onclick: (ev) => copyText(d.id, ev.currentTarget) }, "Salin ID")
-          )
-        )
-      ),
-      sectionBlock("Konteks Bisnis", d.konteksBisnis),
-      sectionBlock("Requirement", d.requirement),
-      sectionBlock("Batasan", d.batasan),
-      el("div", { class: "hidden-note" },
-        el("span", { html: '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm-1 6h2v6h-2V8Zm0 8h2v2h-2v-2Z"/></svg>' }),
-        el("span", {}, "Penilaian dan kriteria keberhasilan disimpan tersembunyi di server. Kamu hanya perlu menyelesaikan requirement di atas; juri AI yang akan menilai.")
-      ),
-      el("button", {
-        class: "btn btn--primary open-assess-btn", type: "button",
-        onclick: () => openInAssess(d.id),
-      }, "Buka di Nilai Konfigurasi →")
-    );
+    const head = renderResultHeader(d, false);
+    const openBtn = head.querySelector(".open-assess-btn");
+    head.insertBefore(sectionBlock("Konteks Bisnis", d.konteksBisnis), openBtn);
+    head.insertBefore(sectionBlock("Requirement", d.requirement), openBtn);
+    head.insertBefore(sectionBlock("Batasan", d.batasan), openBtn);
+    head.insertBefore(el("div", { class: "hidden-note" },
+      el("span", { html: '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm-1 6h2v6h-2V8Zm0 8h2v2h-2v-2Z"/></svg>' }),
+      el("span", {}, "Penilaian dan kriteria keberhasilan disimpan tersembunyi di server. Kamu hanya perlu menyelesaikan requirement di atas; juri AI yang akan menilai.")
+    ), openBtn);
 
     box.appendChild(head);
     box.hidden = false;
     box.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  function openInAssess(id) {
-    showView("nilai");
-    const sel = $("#assess-scenario");
-    if (![...sel.options].some((o) => o.value === id)) {
-      // ensure it's listed
-      refreshScenarioOptions();
-    }
-    sel.value = id;
-    onScenarioSelected(id);
   }
 
   /* =========================================================
@@ -315,18 +387,12 @@
       state.activeScenarioId = id;
       state.activeTutorial = null;
       state.currentScenario = sc;
-      if (sc.mode && !state.modeTouched) {
-        const r = $(`input[name="assess-mode"][value="${sc.mode}"]`);
-        if (r) r.checked = true;
-      }
+      applyModeRadio(sc.mode);
     } else if (tut) {
       state.activeTutorial = tut;
       state.activeScenarioId = null;
       state.currentScenario = null;
-      if (tut.mode && !state.modeTouched) {
-        const r = $(`input[name="assess-mode"][value="${tut.mode}"]`);
-        if (r) r.checked = true;
-      }
+      applyModeRadio(tut.mode);
       prefillSshExtraForTutorial(tut);
     }
     updateActiveTutorialNote();
@@ -414,67 +480,44 @@
 
     const controller = new AbortController();
     state.sshAbort = controller;
-    btn.disabled = true;
-    btn.classList.add("is-loading");
-    btn.querySelector(".btn__label").textContent = "Mengaudit…";
     stopBtn.hidden = false;
 
     let fullOutput = "";
 
     try {
-      const res = await fetch("/api/assess/ssh", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          scenarioId, host, port, user,
-          auth: { type: authType, password, key },
-          extraCommands: extraCommands.length ? extraCommands : undefined,
-        }),
-        signal: controller.signal,
+      await withButton(btn, "Mengaudit…", async () => {
+        const res = await fetch("/api/assess/ssh", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            scenarioId, host, port, user,
+            auth: { type: authType, password, key },
+            extraCommands: extraCommands.length ? extraCommands : undefined,
+          }),
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          let msg = "HTTP " + res.status;
+          try { const e = await res.json(); if (e && e.error) msg = e.error; } catch {}
+          throw new Error(msg);
+        }
+
+        await readSSE(res, handleSSE);
+
+        function handleSSE(evt) {
+          if (evt.event === "command") {
+            appendLog("log-cmd", evt.command);
+          } else if (evt.event === "output") {
+            appendLog("log-out", evt.text);
+            fullOutput += evt.text + "\n";
+          } else if (evt.event === "error") {
+            appendLog("log-err", "ERROR: " + evt.message);
+          } else if (evt.event === "done") {
+            appendLog("log-done", "Audit selesai. Memproses penilaian…");
+            fullOutput = evt.output || fullOutput;
+          }
+        }
       });
-      if (!res.ok) {
-        let msg = "HTTP " + res.status;
-        try { const e = await res.json(); if (e && e.error) msg = e.error; } catch {}
-        throw new Error(msg);
-      }
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        let lines = buffer.split("\n");
-        buffer = lines.pop(); // keep partial line
-        for (const line of lines) {
-          if (!line.trim()) continue;
-          let raw = line;
-          if (raw.startsWith("data:")) raw = raw.slice(5).trim();
-          let evt;
-          try { evt = JSON.parse(raw); } catch { continue; }
-          handleSSE(evt);
-        }
-      }
-      // flush remaining
-      if (buffer.trim()) {
-        try { handleSSE(JSON.parse(buffer)); } catch {}
-      }
-
-      function handleSSE(evt) {
-        if (evt.event === "command") {
-          appendLog("log-cmd", evt.command);
-        } else if (evt.event === "output") {
-          appendLog("log-out", evt.text);
-          fullOutput += evt.text + "\n";
-        } else if (evt.event === "error") {
-          appendLog("log-err", "ERROR: " + evt.message);
-        } else if (evt.event === "done") {
-          appendLog("log-done", "Audit selesai. Memproses penilaian…");
-          fullOutput = evt.output || fullOutput;
-        }
-      }
 
       // After done, analyze + enable "Tanya AI"
       if (fullOutput.trim()) {
@@ -493,9 +536,6 @@
         toast("Koneksi stream gagal: " + err.message, "err", "Audit gagal");
       }
     } finally {
-      btn.disabled = false;
-      btn.classList.remove("is-loading");
-      btn.querySelector(".btn__label").textContent = "Mulai Audit";
       stopBtn.hidden = true;
       state.sshAbort = null;
     }
@@ -518,15 +558,9 @@
     if (!output) { toast("Tempel hasil output router dulu.", "err", "Output kosong"); return; }
 
     const btn = $("#btn-paste");
-    btn.disabled = true; btn.classList.add("is-loading");
-    const prev = btn.querySelector(".btn__label").textContent;
-    btn.querySelector(".btn__label").textContent = "Menilai…";
-    try {
+    await withButton(btn, "Menilai…", async () => {
       await analyzeAndRender(scenarioId, getAssessMode(), output, tutorialContext);
-    } finally {
-      btn.disabled = false; btn.classList.remove("is-loading");
-      btn.querySelector(".btn__label").textContent = prev;
-    }
+    });
   });
 
   function getAssessMode() {
@@ -671,21 +705,13 @@
      VIEW 4 — Tutorial / Latihan
      ========================================================= */
   async function loadTutorialSources() {
-    const sel = $("#tut-source");
-    try {
-      const res = await fetch("/api/tutorial-sources");
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const list = await res.json();
-      const names = Array.isArray(list) ? list.map((x) => x.name).filter(Boolean) : [];
-
-      sel.innerHTML = "";
-      sel.appendChild(el("option", { value: "" }, "Bebas (ai pilih)"));
-      names.forEach((n) => sel.appendChild(el("option", { value: n }, n)));
-    } catch (e) {
-      sel.innerHTML = "";
-      sel.appendChild(el("option", { value: "" }, "Bebas (ai pilih)"));
-      toast("Gagal memuat daftar sumber jobsheet.", "err", "Sumber");
-    }
+    await populateSelect(
+      $("#tut-source"),
+      "/api/tutorial-sources",
+      "Bebas (ai pilih)",
+      (x) => ({ value: x.name, text: x.name }),
+      "Sumber"
+    );
   }
 
   function modeLabel(m) {
@@ -700,32 +726,25 @@
     const mode = $('input[name="tut-mode"]:checked').value;
     const source = $("#tut-source").value; // "" => none
 
-    btn.disabled = true;
-    btn.classList.add("is-loading");
-    const prev = btn.querySelector(".btn__label").textContent;
-    btn.querySelector(".btn__label").textContent = "Membuat…";
-
     try {
-      const res = await fetch("/api/tutorials/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ level, topic, mode, source }),
+      await withButton(btn, "Membuat…", async () => {
+        const res = await fetch("/api/tutorials/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ level, topic, mode, source }),
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+
+        const existing = state.tutorials.find((t) => t.id === data.id);
+        if (!existing) state.tutorials.push(data);
+        else Object.assign(existing, data);
+
+        renderTutorialResult(data);
+        toast("Tutorial berhasil dibuat.", "ok", "Selesai");
       });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const data = await res.json();
-
-      const existing = state.tutorials.find((t) => t.id === data.id);
-      if (!existing) state.tutorials.push(data);
-      else Object.assign(existing, data);
-
-      renderTutorialResult(data);
-      toast("Tutorial berhasil dibuat.", "ok", "Selesai");
     } catch (err) {
       toast("Tidak bisa membuat tutorial. Periksa koneksi atau settings AI.", "err", "Generate gagal");
-    } finally {
-      btn.disabled = false;
-      btn.classList.remove("is-loading");
-      btn.querySelector(".btn__label").textContent = prev;
     }
   });
 
@@ -734,18 +753,7 @@
     box.innerHTML = "";
 
     // Header
-    box.appendChild(el("div", { class: "card" },
-      el("div", { class: "scenario-head" },
-        el("div", {},
-          el("h2", {}, d.title || "Tutorial"),
-          el("div", { class: "tag-row" },
-            el("span", { class: "tag" }, cap(d.level)),
-            el("span", { class: "tag" }, d.topic || "Bebas"),
-            el("span", { class: "tag tag--mode" }, modeLabel(d.mode))
-          )
-        )
-      )
-    ));
+    box.appendChild(renderResultHeader(d, true));
 
     // Pengantar
     if (d.pengantar) box.appendChild(sectionBlock("Pengantar", d.pengantar));
@@ -805,20 +813,7 @@
     // Jump to Nilai Konfigurasi
     box.appendChild(el("button", {
       class: "btn btn--primary open-assess-btn", type: "button",
-      onclick: () => {
-        state.activeTutorial = d;
-        state.activeScenarioId = null;
-        if (![...$("#assess-scenario").options].some((o) => o.value === d.id)) refreshScenarioOptions();
-        $("#assess-scenario").value = d.id;
-        if (d.mode && !state.modeTouched) {
-          const r = $(`input[name="assess-mode"][value="${d.mode}"]`);
-          if (r) r.checked = true;
-        }
-        updateActiveTutorialNote();
-        prefillSshExtraForTutorial(d);
-        showView("nilai");
-        toast("Jobsheet aktif: " + d.title, "ok");
-      },
+      onclick: () => activateAndAssess({ id: d.id, tutorial: true }),
     }, "Latihan di Router → Nilai Hasil"));
 
     refreshScenarioOptions();
@@ -882,32 +877,27 @@
     if (!baseURL || !model) { toast("Base URL dan Model wajib diisi.", "err", "Input kurang"); return; }
 
     const btn = $("#btn-save-settings");
-    btn.disabled = true; btn.classList.add("is-loading");
-    const prev = btn.querySelector(".btn__label").textContent;
-    btn.querySelector(".btn__label").textContent = "Menyimpan…";
-
     try {
-      const body = { baseURL, model };
-      if (apiKey) body.apiKey = apiKey;   // only send if provided
-      const res = await fetch("/api/settings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+      await withButton(btn, "Menyimpan…", async () => {
+        const body = { baseURL, model };
+        if (apiKey) body.apiKey = apiKey;   // only send if provided
+        const res = await fetch("/api/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const d = await res.json();
+        if (d.ok) {
+          toast("Settings disimpan.", "ok", "Tersimpan");
+          $("#set-key").value = "";
+          await loadSettings();
+        } else {
+          throw new Error("respon tidak ok");
+        }
       });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const d = await res.json();
-      if (d.ok) {
-        toast("Settings disimpan.", "ok", "Tersimpan");
-        $("#set-key").value = "";
-        await loadSettings();
-      } else {
-        throw new Error("respon tidak ok");
-      }
     } catch (err) {
       toast("Gagal menyimpan settings: " + err.message, "err", "Save gagal");
-    } finally {
-      btn.disabled = false; btn.classList.remove("is-loading");
-      btn.querySelector(".btn__label").textContent = prev;
     }
   });
 

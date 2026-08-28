@@ -44,4 +44,31 @@ function scenarioTemplates() {
   return templates;
 }
 
-module.exports = { loadAll, scenarioTemplates, SKILL_DIR, REF };
+// Build the "MATERI ACUAN / REFERENSI DOMAIN" reference block for a requested
+// subset. `subset` is { bank, cmd, audit, gui, extracted } where each key is a
+// boolean selecting whether that part is included.
+function buildMaterialsBlock(subset) {
+  const all = loadAll();
+  const labels = {
+    bank: 'Bank Skenario',
+    cmd: 'Command Reference',
+    audit: 'Checklist Audit',
+    gui: 'Checklist GUI (WinBox)',
+    extracted: 'Extracted Materials'
+  };
+  const parts = [];
+  for (const key of ['bank', 'cmd', 'audit', 'gui', 'extracted']) {
+    if (subset && subset[key] && all[key]) {
+      parts.push('### ' + labels[key] + '\n' + all[key]);
+    }
+  }
+  if (!parts.length) return '';
+  return 'MATERI ACUAN / REFERENSI DOMAIN:\n\n' + parts.join('\n\n');
+}
+
+// Shared instruction telling the model to reply with a single JSON object only.
+function jsonOutputInstruction() {
+  return 'Output HARUS berupa object JSON (tanpa markdown fence). Balas HANYA JSON, tanpa teks atau penjelasan di luar object JSON tersebut.';
+}
+
+module.exports = { loadAll, scenarioTemplates, SKILL_DIR, REF, buildMaterialsBlock, jsonOutputInstruction };

@@ -3,7 +3,7 @@ const llm = require('./llm');
 const store = require('./store');
 
 function buildAnalyzePrompt({ scenario, mode, output, tutorialContext }) {
-  const m = materials.loadAll();
+  const mBlock = materials.buildMaterialsBlock({ cmd: true, audit: true });
 
   let req, batasan, criteria;
   if (scenario) {
@@ -34,7 +34,7 @@ function buildAnalyzePrompt({ scenario, mode, output, tutorialContext }) {
   const isGui = mode === 'gui';
   const modeLabel = isGui ? 'GUI (WinBox)' : 'CLI (Terminal)';
   const guiNote = isGui
-    ? `\nMATERI GUI (pakai bahasa menu Winbox untuk hint, mis. "IP > Hotspot > Users"):\n${m.gui}\n`
+    ? `\nMATERI GUI (pakai bahasa menu Winbox untuk hint, mis. "IP > Hotspot > Users"):\n${materials.loadAll().gui}\n`
     : '';
 
   const formatRule = isGui
@@ -50,10 +50,7 @@ function buildAnalyzePrompt({ scenario, mode, output, tutorialContext }) {
   return `Kamu adalah juri praktik MikroTik RouterOS. Kamu menilai konfigurasi murid secara READ-ONLY dan membimbing dengan hint bertahap. Kamu TIDAK PERNAH mengubah konfigurasi router.
 
 MATERI ACUAN:
-===== COMMAND REFERENCE =====
-${m.cmd}
-===== CHECKLIST AUDIT =====
-${m.audit}
+${mBlock}
 ${guiNote}
 
 SKENARIO YANG DINILAI:
@@ -90,12 +87,13 @@ Output HARUS JSON object persis:
   "summary": string,
   "issues": [ { "id": number, "area": string, "severity": string, "level1": string, "level2": string, "level3": string, "fixCommands": string, "concept": string } ]
 }
-Balas HANYA JSON, tanpa teks lain dan tanpa markdown fence.`;
+
+${materials.jsonOutputInstruction()}`;
 }
 
 async function analyze({ scenarioId, mode, output, tutorialContext, settings }) {
   if (!output || !output.trim()) throw new Error('Output router kosong. Paste hasil command atau jalankan audit SSH dulu.');
-  const scenario = scenarioId ? store.getScenario(scenarioId) : null;
+  const scenario = scenarioId ? store.scenarios.get(scenarioId) : null;
   const useMode = mode || (scenario && scenario.mode) || (tutorialContext && tutorialContext.mode) || 'cli';
 
   const parsed = await llm.complete([
