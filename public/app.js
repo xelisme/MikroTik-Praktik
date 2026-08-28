@@ -346,7 +346,11 @@
         }),
         signal: controller.signal,
       });
-      if (!res.ok) throw new Error("HTTP " + res.status);
+      if (!res.ok) {
+        let msg = "HTTP " + res.status;
+        try { const e = await res.json(); if (e && e.error) msg = e.error; } catch {}
+        throw new Error(msg);
+      }
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();

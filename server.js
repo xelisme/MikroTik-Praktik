@@ -157,8 +157,8 @@ app.post('/api/assess/ssh', async (req, res) => {
 // ---- Assess via pasted output ----
 app.post('/api/assess/paste', async (req, res) => {
   try {
-    const { scenarioId, mode, output } = req.body || {};
-    const result = await assess.analyze({ scenarioId, mode, output, settings: req.llmSettings });
+    const { scenarioId, mode, output, tutorialContext } = req.body || {};
+    const result = await assess.analyze({ scenarioId, mode, output, tutorialContext, settings: req.llmSettings });
     res.json(result);
   } catch (e) {
     res.status(500).json({ error: e.message });

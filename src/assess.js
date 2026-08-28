@@ -2,13 +2,34 @@ const materials = require('./materials');
 const llm = require('./llm');
 const store = require('./store');
 
-function buildAnalyzePrompt({ scenario, mode, output }) {
+function buildAnalyzePrompt({ scenario, mode, output, tutorialContext }) {
   const m = materials.loadAll();
-  const req = scenario ? scenario.requirement : '(tidak ada skenario spesifik)';
-  const batasan = scenario ? scenario.batasan : '-';
-  const criteria = scenario && scenario.hiddenCriteria && scenario.hiddenCriteria.length
-    ? scenario.hiddenCriteria.map((c, i) => `${i + 1}. ${c.point} — cek: ${c.check}`).join('\n')
-    : '(tidak ada skenario spesifik; nilai berdasarkan output umum & best practice RouterOS)';
+
+  let req, batasan, criteria;
+  if (scenario) {
+    req = scenario.requirement;
+    batasan = scenario.batasan;
+    criteria = scenario.hiddenCriteria && scenario.hiddenCriteria.length
+      ? scenario.hiddenCriteria.map((c, i) => `${i + 1}. ${c.point} — cek: ${c.check}`).join('\n')
+      : '(tidak ada skenario spesifik; nilai berdasarkan output umum & best practice RouterOS)';
+  } else if (tutorialContext) {
+    req = `Jobsheet praktik: ${tutorialContext.title || '(tanpa judul)'} (topik: ${tutorialContext.topic || '-'})`;
+    const steps = Array.isArray(tutorialContext.bagian)
+      ? tutorialContext.bagian
+          .map((b) => {
+            const ss = Array.isArray(b.steps) ? b.steps : [];
+            return ss.map((s) => `- ${b.judul || ''}: ${s.gui || s.cli || ''}`).join('\n');
+          })
+          .filter(Boolean)
+          .join('\n')
+      : '';
+    batasan = steps || '-';
+    criteria = `Tidak ada kriteria tersembunyi resmi. Nilai berdasarkan apakah output router mencerminkan langkah-langkah jobsheet di atas dan best practice RouterOS. Fokus topik: ${tutorialContext.topic || '-'}.`;
+  } else {
+    req = '(tidak ada skenario spesifik)';
+    batasan = '-';
+    criteria = '(tidak ada skenario spesifik; nilai berdasarkan output umum & best practice RouterOS)';
+  }
 
   const isGui = mode === 'gui';
   const modeLabel = isGui ? 'GUI (WinBox)' : 'CLI (Terminal)';
@@ -72,14 +93,14 @@ Output HARUS JSON object persis:
 Balas HANYA JSON, tanpa teks lain dan tanpa markdown fence.`;
 }
 
-async function analyze({ scenarioId, mode, output, settings }) {
+async function analyze({ scenarioId, mode, output, tutorialContext, settings }) {
   if (!output || !output.trim()) throw new Error('Output router kosong. Paste hasil command atau jalankan audit SSH dulu.');
   const scenario = scenarioId ? store.getScenario(scenarioId) : null;
-  const useMode = mode || (scenario && scenario.mode) || 'cli';
+  const useMode = mode || (scenario && scenario.mode) || (tutorialContext && tutorialContext.mode) || 'cli';
 
   const parsed = await llm.complete([
     { role: 'system', content: 'Kamu menilai konfigurasi MikroTik secara read-only dalam bahasa Indonesia. Balas hanya JSON.' },
-    { role: 'user', content: buildAnalyzePrompt({ scenario, mode: useMode, output }) }
+    { role: 'user', content: buildAnalyzePrompt({ scenario, mode: useMode, output, tutorialContext }) }
   ], { json: true, settings });
   const issues = Array.isArray(parsed.issues) ? parsed.issues.map((it, i) => ({
     id: i + 1,
