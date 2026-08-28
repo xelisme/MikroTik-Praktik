@@ -1,7 +1,8 @@
 {
   "functions": {
     "api/[[...slug]].js": {
-      "includeFiles": "references/**"
+      "includeFiles": "references/**",
+      "maxDuration": 60
     }
   }
 }

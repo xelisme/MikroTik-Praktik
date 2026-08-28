@@ -78,8 +78,10 @@ function saveSettings(s) {
     else delete cur.expiresAt;
   }
   if (s.model !== undefined) cur.model = s.model || DEFAULT_MODEL;
-  // Let writeJson throw propagate to the caller (route catches via asyncHandler).
-  writeJson(SETTINGS, cur);
+  // Best-effort persistence: on a read-only fs (Vercel) the write can't succeed,
+  // but credentials there come from LLM_* env anyway, so don't fail the request.
+  try { writeJson(SETTINGS, cur); }
+  catch (e) { console.warn('[store] settings persist skipped (read-only fs?):', e.message); }
 }
 
 // Pick only the listed fields from an object (used for metadata views).
@@ -96,7 +98,12 @@ function pick(fields) {
 function collection(name, file, metaFields) {
   let cache = null;
   const load = () => cache ??= readJson(file, {});
-  const save = (all) => { cache = all; return writeJson(file, all); };
+  const save = (all) => {
+    cache = all;
+    try { writeJson(file, all); }
+    catch (e) { console.warn('[store] persist skipped (read-only fs?):', file, e.message); }
+    return all;
+  };
   return {
     put: (full) => { const all = load(); all[full.id] = full; save(all); return full; },
     get: (id) => load()[id],
